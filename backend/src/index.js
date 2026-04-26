@@ -16,9 +16,9 @@ const corsOptions = {
       'http://localhost:5173',
       'http://localhost:3000',
       process.env.CLIENT_URL,
-      process.env.NGROK_URL
+      process.env.NGROK_URL,
     ].filter(Boolean);
-    
+
     // Allow all ngrok URLs
     if (!origin || origin.includes('ngrok') || allowedOrigins.includes(origin)) {
       callback(null, true);
@@ -50,19 +50,31 @@ app.use('/api/admin', require('./routes/admin'));
 app.use('/api', require('./routes/messaging'));
 app.use('/api', require('./routes/misc'));
 
+const appState = {
+  db: 'initializing',
+};
+
 // Health check
-app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() }));
+app.get('/api/health', (req, res) => {
+  const isReady = appState.db === 'ready';
+
+  res.status(200).json({
+    status: isReady ? 'ok' : 'starting',
+    db: appState.db,
+    timestamp: new Date(),
+  });
+});
 
 // WebSocket for real-time messaging
 const connectedUsers = new Map();
 
 io.on('connection', (socket) => {
-  console.log('🔌 Socket connected:', socket.id);
+  console.log('Socket connected:', socket.id);
 
   socket.on('join', (userId) => {
     connectedUsers.set(userId, socket.id);
     socket.userId = userId;
-    console.log(`👤 User ${userId} joined`);
+    console.log(`User ${userId} joined`);
   });
 
   socket.on('join_conversation', (conversationId) => {
@@ -82,7 +94,7 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     if (socket.userId) connectedUsers.delete(socket.userId);
-    console.log('🔌 Socket disconnected:', socket.id);
+    console.log('Socket disconnected:', socket.id);
   });
 });
 
@@ -92,20 +104,20 @@ app.set('connectedUsers', connectedUsers);
 
 const PORT = Number(process.env.PORT || process.env.RENDER_PORT || 5000);
 
-const startServer = async () => {
+const initializeDatabase = async () => {
   try {
     await initDb();
-
-    server.listen(PORT, '0.0.0.0', () => {
-      console.log(`🚀 InvestLink Backend running on port ${PORT}`);
-    });
+    appState.db = 'ready';
   } catch (err) {
-    console.error('❌ Impossible de démarrer le backend:', err);
-    process.exit(1);
+    appState.db = 'error';
+    console.error('Database initialization failed:', err);
   }
 };
 
-startServer();
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`InvestLink Backend running on port ${PORT}`);
+  void initializeDatabase();
+});
 
 process.on('SIGTERM', () => {
   server.close(() => {
