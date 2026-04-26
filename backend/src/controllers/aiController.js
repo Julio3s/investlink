@@ -1,6 +1,11 @@
 const Groq = require('groq-sdk');
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+let groq = null;
+
+// Initialiser Groq seulement si la clé existe
+if (process.env.GROQ_API_KEY) {
+  groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+}
 
 const SYSTEM_PROMPT = `Tu es InvestBot, un assistant IA spécialisé dans les projets d'investissement, le financement de startups et la création de business plans sur InvestLink.
 

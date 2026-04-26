@@ -5,4 +5,4 @@ RUN npm install
 COPY backend . 
 RUN mkdir -p uploads/pitchdecks uploads/projects uploads/kyc uploads/avatars uploads/misc
 EXPOSE 5000
-CMD ["npm", "run", "dev"]
+CMD ["npm", "start"]
