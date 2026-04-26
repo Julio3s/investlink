@@ -44,7 +44,7 @@ export default function Notifications() {
   return (
     <div className="page">
       <div className="container" style={{ maxWidth: 700 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
+        <div className="responsive-row" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
           <div>
             <h1 className="section-title">Notifications</h1>
             {unread > 0 && <p style={{ color: 'var(--text-2)', fontSize: 14, marginTop: 4 }}>{unread} non lue(s)</p>}
@@ -78,14 +78,13 @@ export default function Notifications() {
                 <div
                   key={n.id}
                   onClick={() => handleClick(n)}
+                  className="responsive-row"
                   style={{
                     padding: '16px 20px',
                     background: n.is_read ? 'var(--bg-2)' : 'rgba(59,130,246,0.06)',
                     border: `1px solid ${n.is_read ? 'var(--border)' : 'rgba(59,130,246,0.2)'}`,
                     borderRadius: 'var(--radius)',
-                    display: 'flex',
                     gap: 14,
-                    alignItems: 'flex-start',
                     cursor: n.reference_type ? 'pointer' : 'default',
                     transition: 'all 0.15s',
                   }}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
+import { getFileUrl } from '../utils/fileUrl';
 import { Search, Filter, Heart, TrendingUp, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
@@ -19,9 +20,10 @@ function ProjectCard({ project, onFavorite }) {
     <Link to={`/projects/${project.id}`} className="card glow-card project-card">
       <div style={{
         height: 160,
-        background: project.image_url
-          ? `url(${project.image_url}) center/cover`
-          : 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.1))',
+        backgroundImage: project.image_url ? `url(${getFileUrl(project.image_url)})` : 'none',
+        backgroundPosition: 'center',
+        backgroundSize: 'cover',
+        backgroundColor: 'rgba(59,130,246,0.08)',
         position: 'relative',
       }}>
         <div style={{ position: 'absolute', top: 12, left: 12 }}>

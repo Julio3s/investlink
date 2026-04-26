@@ -101,7 +101,7 @@ export default function Messages() {
 
   return (
     <div className="page" style={{ padding: '24px 0' }}>
-      <div className="container" style={{ height: 'calc(100dvh - 120px)' }}>
+      <div className="container" style={{ minHeight: 'calc(100dvh - 120px)' }}>
         <div className="messages-layout">
           {/* Sidebar */}
           <div className="card messages-panel">

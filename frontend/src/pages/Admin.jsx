@@ -84,7 +84,7 @@ export default function Admin() {
         </div>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 32, borderBottom: '1px solid var(--border)', paddingBottom: 16 }}>
+        <div className="responsive-row" style={{ marginBottom: 32, borderBottom: '1px solid var(--border)', paddingBottom: 16 }}>
           {TABS.map(([id, icon, label]) => (
             <button key={id} onClick={() => setTab(id)} className={`btn btn-sm ${tab === id ? 'btn-primary' : 'btn-ghost'}`}>
               {icon} {label}
@@ -100,7 +100,7 @@ export default function Admin() {
             {/* Dashboard */}
             {tab === 'dashboard' && stats && (
               <div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 16, marginBottom: 32 }}>
+                <div className="responsive-stats-5" style={{ marginBottom: 32 }}>
                   {[
                     { label: 'Utilisateurs', value: stats.total_users, icon: Users, color: '#3b82f6' },
                     { label: 'Projets', value: stats.total_projects, icon: Briefcase, color: '#8b5cf6' },
@@ -174,7 +174,7 @@ export default function Admin() {
 
             {/* KYC */}
             {tab === 'kyc' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div className="responsive-stack">
                 {kyc.length === 0 ? (
                   <div className="card" style={{ textAlign: 'center', color: 'var(--text-3)', padding: 48 }}>
                     <Shield size={40} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
@@ -199,7 +199,7 @@ export default function Admin() {
                           )}
                         </div>
                       </div>
-                      <div style={{ display: 'flex', gap: 10 }}>
+                      <div className="responsive-row">
                         <button className="btn btn-sm" style={{ background: 'rgba(16,185,129,0.15)', color: 'var(--success)', border: '1px solid rgba(16,185,129,0.3)' }}
                           onClick={() => validateKyc(k.user_id, 'approve')}>
                           <CheckCircle size={14}/> Approuver
@@ -220,7 +220,7 @@ export default function Admin() {
 
             {/* Reports */}
             {tab === 'reports' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div className="responsive-stack">
                 {reports.length === 0 ? (
                   <div className="card" style={{ textAlign: 'center', color: 'var(--text-3)', padding: 48 }}>
                     <AlertTriangle size={40} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
@@ -237,7 +237,7 @@ export default function Admin() {
                         <div style={{ color: 'var(--text-2)', fontSize: 14, marginBottom: 4 }}>{r.reason}</div>
                         <div style={{ color: 'var(--text-3)', fontSize: 12 }}>{new Date(r.created_at).toLocaleDateString('fr-FR')}</div>
                       </div>
-                      <div style={{ display: 'flex', gap: 10 }}>
+                      <div className="responsive-row">
                         <button className="btn btn-outline btn-sm" onClick={() => resolveReport(r.id, 'traité')}>Traité</button>
                         <button className="btn btn-ghost btn-sm" onClick={() => resolveReport(r.id, 'fermé')}>Fermer</button>
                       </div>

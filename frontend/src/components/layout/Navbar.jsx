@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Bell, MessageSquare, LayoutDashboard, LogOut, User, Briefcase, Search } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import api from '../../utils/api';
+import { getFileUrl } from '../../utils/fileUrl';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -82,7 +83,7 @@ export default function Navbar() {
                     overflow: 'hidden',
                   }}>
                     {user.avatar_url
-                      ? <img src={user.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ? <img src={getFileUrl(user.avatar_url)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       : (user.first_name?.[0] || 'U')}
                   </div>
                   <span className="nav-user-label">{user.first_name}</span>

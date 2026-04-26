@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
+import { getFileUrl } from '../utils/fileUrl';
 import toast from 'react-hot-toast';
 import { Plus, Edit, Trash2, Eye, TrendingUp } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
@@ -24,7 +25,7 @@ export default function MyProjects() {
   return (
     <div className="page">
       <div className="container">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
+        <div className="responsive-row" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
           <div>
             <h1 className="section-title">Mes projets</h1>
             <p style={{ color: 'var(--text-2)', marginTop: 6 }}>{projects.length} projet(s) créé(s)</p>
@@ -42,8 +43,8 @@ export default function MyProjects() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {projects.map(p => (
-              <div key={p.id} className="card" style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
-                <div style={{ width: 56, height: 56, borderRadius: 14, background: p.image_url ? `url(${p.image_url}) center/cover` : 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.15))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0 }}>
+              <div key={p.id} className="card responsive-row" style={{ alignItems: 'center' }}>
+                <div style={{ width: 56, height: 56, borderRadius: 14, background: p.image_url ? `url(${getFileUrl(p.image_url)}) center/cover` : 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.15))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0 }}>
                   {!p.image_url && '🚀'}
                 </div>
                 <div style={{ flex: 1 }}>
@@ -60,7 +61,7 @@ export default function MyProjects() {
                     <span>{formatDistanceToNow(new Date(p.created_at), { addSuffix: true, locale: fr })}</span>
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: 8 }}>
+                <div className="responsive-row">
                   <Link to={`/projects/${p.id}`} className="btn btn-ghost btn-sm"><Eye size={14} /></Link>
                   <Link to={`/projects/${p.id}/edit`} className="btn btn-outline btn-sm"><Edit size={14} /></Link>
                   <button className="btn btn-danger btn-sm" onClick={() => del(p.id)}><Trash2 size={14} /></button>

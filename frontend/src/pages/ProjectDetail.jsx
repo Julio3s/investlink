@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
+import { getFileUrl } from '../utils/fileUrl';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { MapPin, Eye, Heart, MessageSquare, Shield, TrendingUp, FileText, ChevronDown, ChevronUp, Flag } from 'lucide-react';
@@ -51,13 +52,13 @@ export default function ProjectDetail() {
   return (
     <div className="page">
       <div className="container">
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 32, alignItems: 'start' }}>
+        <div className="responsive-two-col" style={{ gridTemplateColumns: '1fr 320px', alignItems: 'start' }}>
           {/* Main */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             {/* Header */}
             <div className="card animate-in" style={{ padding: 0, overflow: 'hidden' }}>
               {project.image_url ? (
-                <img src={project.image_url} alt="" style={{ width: '100%', height: 240, objectFit: 'cover' }} />
+                <img src={getFileUrl(project.image_url)} alt="" style={{ width: '100%', height: 240, objectFit: 'cover' }} />
               ) : (
                 <div style={{ height: 180, background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.1))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 48 }}>🚀</div>
               )}
@@ -94,7 +95,7 @@ export default function ProjectDetail() {
             {project.pitch_deck_url && (
               <div className="card animate-in">
                 <h3 style={{ fontWeight: 700, marginBottom: 12 }}>📄 Pitch Deck</h3>
-                <a href={project.pitch_deck_url} target="_blank" rel="noopener noreferrer" className="btn btn-outline" style={{ gap: 8 }}>
+                <a href={getFileUrl(project.pitch_deck_url)} target="_blank" rel="noopener noreferrer" className="btn btn-outline" style={{ gap: 8 }}>
                   <FileText size={16} /> Télécharger le pitch deck
                 </a>
               </div>
@@ -123,7 +124,7 @@ export default function ProjectDetail() {
           </div>
 
           {/* Sidebar */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20, position: 'sticky', top: 90 }}>
+          <div className="project-sidebar" style={{ display: 'flex', flexDirection: 'column', gap: 20, position: 'sticky', top: 90 }}>
             {/* Amount */}
             <div className="card" style={{ textAlign: 'center', background: 'linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.05))', borderColor: 'rgba(59,130,246,0.2)' }}>
               <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-3)', marginBottom: 8 }}>Montant recherché</div>
@@ -131,7 +132,7 @@ export default function ProjectDetail() {
                 {Number(project.amount_sought).toLocaleString('fr-FR')} €
               </div>
               {user && user.role === 'investisseur' && user.id !== project.owner_id && (
-                <button className="btn btn-primary" onClick={handleContact} disabled={contacting} style={{ width: '100%', justifyContent: 'center', marginTop: 20 }}>
+                <button className="btn btn-primary mobile-full-width" onClick={handleContact} disabled={contacting} style={{ width: '100%', justifyContent: 'center', marginTop: 20 }}>
                   {contacting ? <span className="spinner" /> : <><MessageSquare size={16} /> Je suis intéressé</>}
                 </button>
               )}
@@ -142,7 +143,7 @@ export default function ProjectDetail() {
               <h4 style={{ fontWeight: 700, marginBottom: 16, fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-3)' }}>Porteur</h4>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
                 <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 700, color: 'white', flexShrink: 0 }}>
-                  {project.avatar_url ? <img src={project.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /> : project.first_name?.[0]}
+                  {project.avatar_url ? <img src={getFileUrl(project.avatar_url)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /> : project.first_name?.[0]}
                 </div>
                 <div>
                   <div style={{ fontWeight: 700 }}>{project.first_name} {project.last_name}</div>
@@ -163,7 +164,7 @@ export default function ProjectDetail() {
 
             {/* Report */}
             {user && user.id !== project.owner_id && (
-              <button className="btn btn-ghost btn-sm" onClick={handleReport} style={{ color: 'var(--text-3)', justifyContent: 'center' }}>
+              <button className="btn btn-ghost btn-sm mobile-full-width" onClick={handleReport} style={{ color: 'var(--text-3)', justifyContent: 'center' }}>
                 <Flag size={14} /> Signaler ce projet
               </button>
             )}

@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/layout/Navbar';
+import MobileBottomNav from './components/layout/MobileBottomNav';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -79,6 +80,7 @@ function AppRoutes() {
         } />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <MobileBottomNav />
     </>
   );
 }

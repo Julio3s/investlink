@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
+import { getFileUrl } from '../utils/fileUrl';
 import toast from 'react-hot-toast';
 import { User, Shield, Upload, CheckCircle, Clock, XCircle, Star } from 'lucide-react';
 
@@ -66,7 +67,7 @@ export default function Profile() {
         <h1 className="section-title" style={{ marginBottom: 32 }}>Mon profil</h1>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 32, borderBottom: '1px solid var(--border)', paddingBottom: 16 }}>
+        <div className="responsive-row" style={{ marginBottom: 32, borderBottom: '1px solid var(--border)', paddingBottom: 16 }}>
           {[['profile', <User size={15}/>, 'Profil'], ['kyc', <Shield size={15}/>, 'Vérification']].map(([id, icon, label]) => (
             <button key={id} onClick={() => setTab(id)} className={`btn btn-sm ${tab === id ? 'btn-primary' : 'btn-ghost'}`}>
               {icon} {label}
@@ -77,9 +78,9 @@ export default function Profile() {
         {tab === 'profile' && (
           <div className="animate-in">
             {/* Trust score card */}
-            <div className="card" style={{ marginBottom: 24, display: 'flex', alignItems: 'center', gap: 24 }}>
+            <div className="card responsive-row" style={{ marginBottom: 24, alignItems: 'center' }}>
               <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg,#3b82f6,#8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 800, color: 'white', flexShrink: 0, overflow: 'hidden' }}>
-                {user?.avatar_url ? <img src={user.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : user?.first_name?.[0]}
+                {user?.avatar_url ? <img src={getFileUrl(user.avatar_url)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : user?.first_name?.[0]}
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700, fontSize: 20 }}>{user?.first_name} {user?.last_name}</div>
@@ -105,11 +106,11 @@ export default function Profile() {
                   <label>Photo de profil</label>
                   <input type="file" accept="image/*" onChange={e => setAvatarFile(e.target.files[0])} style={{ color: 'var(--text-2)', fontSize: 13 }} />
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <div className="responsive-two-col" style={{ gridTemplateColumns: '1fr 1fr' }}>
                   <div className="form-group"><label>Prénom</label><input className="input" value={form.first_name} onChange={e => setForm({...form, first_name: e.target.value})} /></div>
                   <div className="form-group"><label>Nom</label><input className="input" value={form.last_name} onChange={e => setForm({...form, last_name: e.target.value})} /></div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <div className="responsive-two-col" style={{ gridTemplateColumns: '1fr 1fr' }}>
                   <div className="form-group"><label>Téléphone</label><input className="input" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} /></div>
                   <div className="form-group"><label>Pays</label>
                     <select className="input" value={form.country} onChange={e => setForm({...form, country: e.target.value})}>
@@ -146,7 +147,7 @@ export default function Profile() {
 
               {kycStatus?.status !== 'verifie' && (
                 <form onSubmit={submitKYC} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  <div className="responsive-two-col" style={{ gridTemplateColumns: '1fr 1fr' }}>
                     <div className="form-group">
                       <label>Pièce d'identité (recto/verso)</label>
                       <div style={{ padding: '20px', border: '2px dashed var(--border-light)', borderRadius: 'var(--radius)', textAlign: 'center', cursor: 'pointer', background: 'var(--bg-3)' }}>
