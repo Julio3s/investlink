@@ -4,6 +4,7 @@ const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const initDb = require('./config/initDb');
 
 const app = express();
 const server = http.createServer(app);
@@ -90,8 +91,20 @@ app.set('io', io);
 app.set('connectedUsers', connectedUsers);
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`🚀 InvestLink Backend running on port ${PORT}`);
-});
+
+const startServer = async () => {
+  try {
+    await initDb();
+
+    server.listen(PORT, () => {
+      console.log(`🚀 InvestLink Backend running on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error('❌ Impossible de démarrer le backend:', err);
+    process.exit(1);
+  }
+};
+
+startServer();
 
 module.exports = { app, io };
