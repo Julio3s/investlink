@@ -90,13 +90,13 @@ io.on('connection', (socket) => {
 app.set('io', io);
 app.set('connectedUsers', connectedUsers);
 
-const PORT = process.env.PORT || 5000;
+const PORT = Number(process.env.PORT || process.env.RENDER_PORT || 5000);
 
 const startServer = async () => {
   try {
     await initDb();
 
-    server.listen(PORT, () => {
+    server.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 InvestLink Backend running on port ${PORT}`);
     });
   } catch (err) {
@@ -106,5 +106,11 @@ const startServer = async () => {
 };
 
 startServer();
+
+process.on('SIGTERM', () => {
+  server.close(() => {
+    process.exit(0);
+  });
+});
 
 module.exports = { app, io };

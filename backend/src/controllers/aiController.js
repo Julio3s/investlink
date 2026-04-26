@@ -2,10 +2,13 @@ const Groq = require('groq-sdk');
 
 let groq = null;
 
-// Initialiser Groq seulement si la clé existe
-if (process.env.GROQ_API_KEY) {
-  groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-}
+const getGroqClient = () => {
+  if (!process.env.GROQ_API_KEY) return null;
+  if (!groq) {
+    groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+  }
+  return groq;
+};
 
 const SYSTEM_PROMPT = `Tu es InvestBot, un assistant IA spécialisé dans les projets d'investissement, le financement de startups et la création de business plans sur InvestLink.
 
@@ -38,7 +41,14 @@ const chat = async (req, res) => {
       return res.status(400).json({ message: 'Messages requis' });
     }
 
-    const response = await groq.chat.completions.create({
+    const client = getGroqClient();
+    if (!client) {
+      return res.status(503).json({
+        message: "Le service IA n'est pas configuré sur ce déploiement.",
+      });
+    }
+
+    const response = await client.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
@@ -49,10 +59,10 @@ const chat = async (req, res) => {
     });
 
     res.json({
-      reply: response.choices[0].message.content,
+      reply: response.choices?.[0]?.message?.content || '',
     });
   } catch (err) {
-    console.error('Groq error:', err.message);
+    console.error('Groq error:', err?.message || err);
     res.status(500).json({ message: 'Erreur IA, veuillez réessayer' });
   }
 };
