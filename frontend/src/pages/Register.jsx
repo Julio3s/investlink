@@ -36,7 +36,7 @@ export default function Register() {
           <form onSubmit={handleSubmit} style={{display:'flex',flexDirection:'column',gap:20}}>
             <div className="form-group">
               <label>Je suis</label>
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+              <div className="form-grid-roles">
                 {[{value:'porteur',label:'Porteur de projet',icon:Briefcase,desc:"J'ai un projet à financer"},
                   {value:'investisseur',label:'Investisseur',icon:TrendingUp,desc:"Je cherche à investir"}].map(({value,label,icon:Icon,desc})=>(
                   <button key={value} type="button" onClick={()=>set('role',value)}
@@ -48,12 +48,12 @@ export default function Register() {
                 ))}
               </div>
             </div>
-            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
+            <div className="form-grid-2">
               <div className="form-group"><label>Prénom</label><input className="input" placeholder="Jean" value={form.first_name} onChange={e=>set('first_name',e.target.value)} required/></div>
               <div className="form-group"><label>Nom</label><input className="input" placeholder="Dupont" value={form.last_name} onChange={e=>set('last_name',e.target.value)} required/></div>
             </div>
             <div className="form-group"><label>Email</label><input className="input" type="email" placeholder="votre@email.com" value={form.email} onChange={e=>set('email',e.target.value)} required/></div>
-            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
+            <div className="form-grid-2">
               <div className="form-group"><label>Téléphone</label><input className="input" placeholder="+33 6 00 00 00" value={form.phone} onChange={e=>set('phone',e.target.value)}/></div>
               <div className="form-group"><label>Pays</label>
                 <select className="input" value={form.country} onChange={e=>set('country',e.target.value)}>

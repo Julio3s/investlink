@@ -19,42 +19,38 @@ export default function Navbar() {
   const unread = notifications.length;
 
   return (
-    <nav style={{
+    <nav className="site-nav" style={{
       position: 'sticky', top: 0, zIndex: 100,
       background: 'rgba(10, 13, 20, 0.92)',
       backdropFilter: 'blur(20px)',
       borderBottom: '1px solid var(--border)',
       height: '70px',
     }}>
-      <div className="container" style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{
-            width: 36, height: 36,
-            background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-            borderRadius: 10,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 18, fontWeight: 800, color: 'white',
-          }}>I</div>
-          <span style={{ fontWeight: 800, fontSize: 20, letterSpacing: '-0.03em' }}>
+      <div className="container nav-shell">
+        <Link to="/" className="nav-brand">
+          <div className="nav-brand-mark">I</div>
+          <span className="nav-brand-text">
             Invest<span className="gradient-text">Link</span>
           </span>
         </Link>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <Link to="/projects" className="btn btn-ghost btn-sm">
-            <Search size={15} /> Explorer
+        <div className="nav-actions">
+          <Link to="/projects" className="btn btn-ghost btn-sm nav-icon-btn" title="Explorer">
+            <Search size={15} />
+            <span className="nav-user-label mobile-hide">Explorer</span>
           </Link>
           {user ? (
             <>
               {user.role === 'porteur' && (
-                <Link to="/my-projects" className="btn btn-ghost btn-sm">
-                  <Briefcase size={15} /> Mes projets
+                <Link to="/my-projects" className="btn btn-ghost btn-sm nav-icon-btn" title="Mes projets">
+                  <Briefcase size={15} />
+                  <span className="nav-user-label mobile-hide">Mes projets</span>
                 </Link>
               )}
-              <Link to="/messages" className="btn btn-ghost btn-sm" style={{ position: 'relative' }}>
+              <Link to="/messages" className="btn btn-ghost btn-sm nav-icon-btn" title="Messages">
                 <MessageSquare size={15} />
               </Link>
-              <Link to="/notifications" className="btn btn-ghost btn-sm" style={{ position: 'relative' }}>
+              <Link to="/notifications" className="btn btn-ghost btn-sm nav-icon-btn" title="Notifications">
                 <Bell size={15} />
                 {unread > 0 && (
                   <span style={{
@@ -68,7 +64,7 @@ export default function Navbar() {
                 )}
               </Link>
               {user.role === 'admin' && (
-                <Link to="/admin" className="btn btn-ghost btn-sm">
+                <Link to="/admin" className="btn btn-ghost btn-sm nav-icon-btn" title="Administration">
                   <LayoutDashboard size={15} />
                 </Link>
               )}
@@ -89,19 +85,10 @@ export default function Navbar() {
                       ? <img src={user.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       : (user.first_name?.[0] || 'U')}
                   </div>
-                  <span style={{ fontSize: 13 }}>{user.first_name}</span>
+                  <span className="nav-user-label">{user.first_name}</span>
                 </button>
                 {showMenu && (
-                  <div style={{
-                    position: 'absolute', top: '110%', right: 0,
-                    background: 'var(--bg-2)',
-                    border: '1px solid var(--border-light)',
-                    borderRadius: 'var(--radius)',
-                    minWidth: 180,
-                    boxShadow: 'var(--shadow)',
-                    overflow: 'hidden',
-                    zIndex: 200,
-                  }} onClick={() => setShowMenu(false)}>
+                  <div className="nav-menu" onClick={() => setShowMenu(false)}>
                     <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', color: 'var(--text)', fontSize: 14, transition: 'background 0.15s' }}
                       onMouseEnter={e => e.currentTarget.style.background='var(--bg-3)'}
                       onMouseLeave={e => e.currentTarget.style.background='transparent'}>
@@ -116,7 +103,7 @@ export default function Navbar() {
                 )}
               </div>
             </>
-          ) : (
+        ) : (
             <>
               <Link to="/login" className="btn btn-ghost btn-sm">Connexion</Link>
               <Link to="/register" className="btn btn-primary btn-sm">S'inscrire</Link>

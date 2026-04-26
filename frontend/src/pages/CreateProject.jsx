@@ -65,7 +65,7 @@ export default function CreateProject() {
                 <label>Titre du projet *</label>
                 <input className="input" value={form.title} onChange={e => set('title', e.target.value)} placeholder="Ex: AgroConnect — Plateforme B2B pour agriculteurs" required />
               </div>
-              <div className="grid-2">
+              <div className="form-grid-2">
                 <div className="form-group">
                   <label>Secteur</label>
                   <select className="input" value={form.sector} onChange={e => set('sector', e.target.value)}>
@@ -81,7 +81,7 @@ export default function CreateProject() {
                   </select>
                 </div>
               </div>
-              <div className="grid-2">
+              <div className="form-grid-2">
                 <div className="form-group">
                   <label>Montant recherché (€) *</label>
                   <input className="input" type="number" value={form.amount_sought} onChange={e => set('amount_sought', e.target.value)} placeholder="50000" required min="1000" />
@@ -118,7 +118,7 @@ export default function CreateProject() {
 
           <div className="card">
             <h3 style={{ fontWeight: 700, marginBottom: 20 }}>Médias</h3>
-            <div className="grid-2">
+            <div className="form-grid-2">
               <div className="form-group">
                 <label>Pitch Deck (PDF)</label>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px', background: 'var(--bg-3)', border: '1px dashed var(--border-light)', borderRadius: 'var(--radius)', cursor: 'pointer', fontSize: 14, color: 'var(--text-2)' }}>
@@ -138,7 +138,7 @@ export default function CreateProject() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 16, justifyContent: 'flex-end' }}>
+          <div className="form-actions">
             <button type="button" className="btn btn-outline" onClick={() => navigate('/my-projects')}>Annuler</button>
             <button type="submit" className="btn btn-primary" disabled={loading}>
               {loading ? <span className="spinner" /> : <><Save size={16} /> {isEdit ? 'Enregistrer' : 'Créer le projet'}</>}

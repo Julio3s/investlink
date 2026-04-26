@@ -16,7 +16,7 @@ function ProjectCard({ project, onFavorite }) {
   const statusLabels = { brouillon: 'Brouillon', publié: 'Publié', en_recherche: 'En recherche', financé: 'Financé' };
 
   return (
-    <Link to={`/projects/${project.id}`} className="card glow-card" style={{ display: 'flex', flexDirection: 'column', gap: 0, padding: 0, overflow: 'hidden', textDecoration: 'none' }}>
+    <Link to={`/projects/${project.id}`} className="card glow-card project-card">
       <div style={{
         height: 160,
         background: project.image_url
@@ -44,7 +44,7 @@ function ProjectCard({ project, onFavorite }) {
         </div>
       </div>
 
-      <div style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div className="project-card-body">
         <h3 style={{ fontWeight: 700, fontSize: 16, letterSpacing: '-0.02em', lineHeight: 1.3 }}>{project.title}</h3>
         <p style={{ color: 'var(--text-2)', fontSize: 13, lineHeight: 1.6, flex: 1, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
           {project.solution}
@@ -60,7 +60,7 @@ function ProjectCard({ project, onFavorite }) {
           </div>
         </div>
 
-        <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="project-card-footer">
           <div>
             <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: '-0.03em' }}>
               {Number(project.amount_sought).toLocaleString('fr-FR')} €
@@ -136,20 +136,20 @@ export default function Projects() {
 
         {/* Search & Filters */}
         <div className="card" style={{ marginBottom: 32 }}>
-          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-            <div style={{ flex: 1, minWidth: 200 }}>
+          <div className="project-filters">
+            <div className="project-search-field">
               <div style={{ position: 'relative' }}>
                 <Search size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} />
                 <input className="input" placeholder="Rechercher un projet..." value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft: 38 }} />
               </div>
             </div>
-            <div style={{ minWidth: 140 }}>
+            <div className="project-filter-field">
               <select className="input" value={filters.sector} onChange={e => setFilters(f => ({ ...f, sector: e.target.value }))}>
                 <option value="">Tous secteurs</option>
                 {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
-            <div style={{ minWidth: 140 }}>
+            <div className="project-filter-field">
               <select className="input" value={filters.status} onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}>
                 <option value="">Tous statuts</option>
                 <option value="publié">Publié</option>
@@ -157,7 +157,7 @@ export default function Projects() {
                 <option value="financé">Financé</option>
               </select>
             </div>
-            <div style={{ minWidth: 140 }}>
+            <div className="project-filter-field">
               <select className="input" value={filters.sort} onChange={e => setFilters(f => ({ ...f, sort: e.target.value }))}>
                 <option value="recent">Plus récents</option>
                 <option value="popular">Populaires</option>
@@ -169,7 +169,7 @@ export default function Projects() {
         </div>
 
         {loading ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
+          <div className="projects-skeleton">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="card loading-pulse" style={{ height: 340 }} />
             ))}
@@ -181,7 +181,7 @@ export default function Projects() {
           </div>
         ) : (
           <>
-            <div className="grid-3">
+            <div className="project-grid">
               {displayed.map(p => <ProjectCard key={p.id} project={p} onFavorite={handleFavorite} />)}
             </div>
 

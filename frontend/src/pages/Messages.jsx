@@ -101,14 +101,14 @@ export default function Messages() {
 
   return (
     <div className="page" style={{ padding: '24px 0' }}>
-      <div className="container" style={{ height: 'calc(100vh - 120px)' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: 24, height: '100%' }}>
+      <div className="container" style={{ height: 'calc(100dvh - 120px)' }}>
+        <div className="messages-layout">
           {/* Sidebar */}
-          <div className="card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', fontWeight: 700 }}>
+          <div className="card messages-panel">
+            <div className="messages-panel-header" style={{ borderBottom: '1px solid var(--border)', fontWeight: 700 }}>
               <MessageSquare size={16} style={{ display: 'inline', marginRight: 8 }} />Messages
             </div>
-            <div style={{ flex: 1, overflowY: 'auto' }}>
+            <div className="messages-panel-list" style={{ flex: 1 }}>
               {conversations.length === 0 ? (
                 <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-3)', fontSize: 14 }}>Aucune conversation</div>
               ) : conversations.map(conv => {
@@ -145,10 +145,10 @@ export default function Messages() {
           </div>
 
           {/* Chat */}
-          <div className="card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <div className="card messages-chat">
             {activeConv ? (
               <>
-                <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div className="messages-chat-header" style={{ borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 12 }}>
                   <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#3b82f6,#8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: 'white' }}>
                     {getOtherUser(activeConv).name?.[0]}
                   </div>
@@ -157,7 +157,7 @@ export default function Messages() {
                     {activeConv.project_title && <div style={{ fontSize: 12, color: 'var(--text-3)' }}>Projet: {activeConv.project_title}</div>}
                   </div>
                 </div>
-                <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div className="messages-chat-body">
                   {messages.map((msg, i) => {
                     const isMine = msg.sender_id === user.id;
                     return (
@@ -185,7 +185,7 @@ export default function Messages() {
                   })}
                   <div ref={bottomRef} />
                 </div>
-                <form onSubmit={sendMsg} style={{ padding: '16px 20px', borderTop: '1px solid var(--border)', display: 'flex', gap: 12 }}>
+                <form onSubmit={sendMsg} className="messages-chat-footer" style={{ borderTop: '1px solid var(--border)', display: 'flex', gap: 12 }}>
                   <input className="input" value={input} onChange={e => setInput(e.target.value)} placeholder="Écrire un message..." onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendMsg(e)} />
                   <button type="submit" className="btn btn-primary" disabled={sending || !input.trim()}>
                     {sending ? <span className="spinner" /> : <Send size={16} />}
@@ -203,10 +203,10 @@ export default function Messages() {
       </div>
 
       {/* AI Assistant floating button */}
-      <div style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 1000 }}>
+      <div className="messages-ai-shell">
         {showAI ? (
-          <div style={{ width: 360, height: 520, background: 'var(--bg-2)', border: '1px solid var(--border-light)', borderRadius: 20, boxShadow: '0 20px 60px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            <div style={{ padding: '14px 18px', background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="messages-ai-panel">
+            <div className="messages-ai-header" style={{ background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'white' }}>
                 <Bot size={18} />
                 <span style={{ fontWeight: 700 }}>InvestBot</span>
@@ -214,7 +214,7 @@ export default function Messages() {
               </div>
               <button onClick={() => setShowAI(false)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><X size={18} /></button>
             </div>
-            <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div className="messages-ai-body" style={{ flex: 1, padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
               {aiMessages.map((m, i) => (
                 <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
                   <div style={{
@@ -229,7 +229,7 @@ export default function Messages() {
               </div>}
               <div ref={aiBottomRef} />
             </div>
-            <form onSubmit={sendAI} style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', display: 'flex', gap: 8 }}>
+            <form onSubmit={sendAI} className="messages-ai-footer" style={{ borderTop: '1px solid var(--border)', display: 'flex', gap: 8 }}>
               <input className="input" value={aiInput} onChange={e => setAiInput(e.target.value)} placeholder="Posez votre question..." style={{ fontSize: 13 }} />
               <button type="submit" className="btn btn-primary btn-sm" disabled={aiLoading || !aiInput.trim()}><Send size={14} /></button>
             </form>

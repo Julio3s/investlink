@@ -8,7 +8,7 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <section style={{
+      <section className="home-hero" style={{
         minHeight: '88vh',
         display: 'flex', alignItems: 'center',
         position: 'relative', overflow: 'hidden',
@@ -33,23 +33,17 @@ export default function Home() {
             <div className="badge badge-sector" style={{ marginBottom: 24, fontSize: 13 }}>
               <Star size={12} /> Plateforme de mise en relation #1
             </div>
-            <h1 style={{
-              fontSize: 'clamp(40px, 6vw, 72px)',
-              fontWeight: 800,
-              letterSpacing: '-0.04em',
-              lineHeight: 1.08,
-              marginBottom: 24,
-            }}>
+            <h1 className="hero-title" style={{ marginBottom: 24 }}>
               Connectez vos{' '}
               <span style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic' }} className="gradient-text">projets</span>
               {' '}aux bons{' '}
               <span style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic' }} className="gradient-text">investisseurs</span>
             </h1>
-            <p style={{ fontSize: 18, color: 'var(--text-2)', maxWidth: 560, lineHeight: 1.7, marginBottom: 40 }}>
+            <p className="hero-copy" style={{ marginBottom: 40 }}>
               InvestLink facilite la rencontre entre porteurs de projets innovants et investisseurs visionnaires. 
               Simple, sécurisé, et axé sur la confiance.
             </p>
-            <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+            <div className="hero-actions" style={{ marginBottom: 0 }}>
               {user ? (
                 <Link to="/projects" className="btn btn-primary btn-lg">
                   Explorer les projets <ArrowRight size={18} />
@@ -66,7 +60,7 @@ export default function Home() {
               )}
             </div>
 
-            <div style={{ display: 'flex', gap: 32, marginTop: 48, flexWrap: 'wrap' }}>
+            <div className="stats-row" style={{ marginTop: 48 }}>
               {[['500+', 'Projets publiés'], ['1 200+', 'Investisseurs actifs'], ['98%', 'Taux de satisfaction']].map(([n, l]) => (
                 <div key={l}>
                   <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.03em' }}>{n}</div>
@@ -88,7 +82,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid-3">
+          <div className="feature-grid">
             {[
               { icon: Shield, title: 'Vérification KYC', desc: 'Chaque profil est vérifié manuellement. Badge de confiance attribué après validation.', color: '#10b981' },
               { icon: TrendingUp, title: 'Score de confiance', desc: 'Un score basé sur la complétude du profil, la vérification et l\'activité.', color: '#3b82f6' },
@@ -132,7 +126,7 @@ export default function Home() {
             <p style={{ color: 'var(--text-2)', fontSize: 16, marginBottom: 32 }}>
               Rejoignez des centaines de porteurs de projets et d'investisseurs sur InvestLink
             </p>
-            <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <div className="hero-actions" style={{ justifyContent: 'center' }}>
               <Link to="/register?role=porteur" className="btn btn-primary btn-lg">
                 🚀 Je porte un projet
               </Link>
