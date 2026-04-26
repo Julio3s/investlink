@@ -453,6 +453,7 @@ export default function Messages() {
               padding: 0,
               justifyContent: 'center',
               boxShadow: '0 8px 24px rgba(59,130,246,0.4)',
+              pointerEvents: 'auto',
             }}
           >
             <Bot size={22} />
