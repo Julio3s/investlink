@@ -1,54 +1,109 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../utils/api';
-import { getFileUrl } from '../utils/fileUrl';
-import { Search, Filter, Heart, TrendingUp, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { ChevronLeft, ChevronRight, Heart, MapPin, Search, TrendingUp } from 'lucide-react';
 import toast from 'react-hot-toast';
+import api from '../utils/api';
+import { useAuth } from '../context/AuthContext';
+import Avatar from '../components/common/Avatar';
+import CoverImage from '../components/common/CoverImage';
 
-const SECTORS = ['Technologie', 'Agri-tech', 'Fintech', 'Santé', 'Éducation', 'Énergie', 'Commerce', 'Logistique', 'Immobilier', 'Autre'];
+const SECTORS = ['Technologie', 'Agri-tech', 'Fintech', 'Sante', 'Santé', 'Education', 'Éducation', 'Energie', 'Énergie', 'Commerce', 'Logistique', 'Immobilier', 'Autre'];
 
 function ProjectCard({ project, onFavorite }) {
   const { user } = useAuth();
   const trustColor = project.trust_score > 66 ? 'var(--success)' : project.trust_score > 33 ? 'var(--gold)' : 'var(--danger)';
-  const trustLabel = project.trust_score > 66 ? 'Élevé' : project.trust_score > 33 ? 'Moyen' : 'Faible';
+  const trustLabel = project.trust_score > 66 ? 'Eleve' : project.trust_score > 33 ? 'Moyen' : 'Faible';
 
-  const statusColors = { brouillon: '#5a6278', publié: '#3b82f6', en_recherche: '#f59e0b', financé: '#10b981' };
-  const statusLabels = { brouillon: 'Brouillon', publié: 'Publié', en_recherche: 'En recherche', financé: 'Financé' };
+  const statusColors = { brouillon: '#5a6278', publie: '#3b82f6', 'publié': '#3b82f6', en_recherche: '#f59e0b', finance: '#10b981', 'financé': '#10b981' };
+  const statusLabels = { brouillon: 'Brouillon', publie: 'Publie', 'publié': 'Publie', en_recherche: 'En recherche', finance: 'Finance', 'financé': 'Finance' };
+  const statusColor = statusColors[project.status] || '#3b82f6';
+  const statusLabel = statusLabels[project.status] || project.status;
 
   return (
     <Link to={`/projects/${project.id}`} className="card glow-card project-card">
-      <div style={{
-        height: 160,
-        backgroundImage: project.image_url ? `url(${getFileUrl(project.image_url)})` : 'none',
-        backgroundPosition: 'center',
-        backgroundSize: 'cover',
-        backgroundColor: 'rgba(59,130,246,0.08)',
-        position: 'relative',
-      }}>
+      <div style={{ height: 160, backgroundColor: 'rgba(59,130,246,0.08)', position: 'relative', overflow: 'hidden' }}>
+        <CoverImage
+          src={project.image_url}
+          alt={project.title}
+          style={{ width: '100%', height: '100%' }}
+          imgStyle={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          fallback={
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                background: 'linear-gradient(135deg, rgba(59,130,246,0.18), rgba(139,92,246,0.1))',
+              }}
+            />
+          }
+        />
+
         <div style={{ position: 'absolute', top: 12, left: 12 }}>
-          <span className="badge badge-sector" style={{ fontSize: 11 }}>{project.sector || 'Général'}</span>
+          <span className="badge badge-sector" style={{ fontSize: 11 }}>
+            {project.sector || 'General'}
+          </span>
         </div>
+
         <div style={{ position: 'absolute', top: 12, right: 12, display: 'flex', gap: 6 }}>
           {project.is_validated && (
-            <span className="badge badge-verified" style={{ fontSize: 11 }}>✓ Validé</span>
+            <span className="badge badge-verified" style={{ fontSize: 11 }}>
+              Valide
+            </span>
           )}
-          {user && user.role === 'investisseur' && (
-            <button onClick={(e) => { e.preventDefault(); onFavorite(project.id); }} style={{ background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: 8, padding: '4px 8px', color: 'white', cursor: 'pointer', backdropFilter: 'blur(8px)' }}>
+          {user?.role === 'investisseur' && (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                onFavorite(project.id);
+              }}
+              style={{
+                background: 'rgba(0,0,0,0.5)',
+                border: 'none',
+                borderRadius: 8,
+                padding: '4px 8px',
+                color: 'white',
+                cursor: 'pointer',
+                backdropFilter: 'blur(8px)',
+              }}
+            >
               <Heart size={14} />
             </button>
           )}
         </div>
+
         <div style={{ position: 'absolute', bottom: 12, right: 12 }}>
-          <span style={{ background: statusColors[project.status] + '22', color: statusColors[project.status], border: `1px solid ${statusColors[project.status]}40`, borderRadius: 999, padding: '2px 10px', fontSize: 11, fontWeight: 600 }}>
-            {statusLabels[project.status]}
+          <span
+            style={{
+              background: `${statusColor}22`,
+              color: statusColor,
+              border: `1px solid ${statusColor}40`,
+              borderRadius: 999,
+              padding: '2px 10px',
+              fontSize: 11,
+              fontWeight: 600,
+            }}
+          >
+            {statusLabel}
           </span>
         </div>
       </div>
 
       <div className="project-card-body">
-        <h3 style={{ fontWeight: 700, fontSize: 16, letterSpacing: '-0.02em', lineHeight: 1.3 }}>{project.title}</h3>
-        <p style={{ color: 'var(--text-2)', fontSize: 13, lineHeight: 1.6, flex: 1, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+        <h3 style={{ fontWeight: 700, fontSize: 16, letterSpacing: '-0.02em', lineHeight: 1.3 }}>
+          {project.title}
+        </h3>
+        <p
+          style={{
+            color: 'var(--text-2)',
+            fontSize: 13,
+            lineHeight: 1.6,
+            flex: 1,
+            overflow: 'hidden',
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+          }}
+        >
           {project.solution}
         </p>
 
@@ -65,23 +120,23 @@ function ProjectCard({ project, onFavorite }) {
         <div className="project-card-footer">
           <div>
             <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: '-0.03em' }}>
-              {Number(project.amount_sought).toLocaleString('fr-FR')} €
+              {Number(project.amount_sought).toLocaleString('fr-FR')} EUR
             </div>
-            <div style={{ fontSize: 11, color: 'var(--text-3)' }}>Recherché</div>
+            <div style={{ fontSize: 11, color: 'var(--text-3)' }}>Recherche</div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{
-              width: 32, height: 32, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 13, fontWeight: 700, color: 'white',
-            }}>
-              {project.first_name?.[0]}
-            </div>
+            <Avatar
+              src={project.avatar_url}
+              name={`${project.first_name || ''} ${project.last_name || ''}`}
+              size={32}
+              textStyle={{ fontSize: 13 }}
+            />
             <div style={{ fontSize: 13 }}>
-              <div style={{ fontWeight: 600 }}>{project.first_name} {project.last_name?.[0]}.</div>
+              <div style={{ fontWeight: 600 }}>
+                {project.first_name} {project.last_name?.[0]}.
+              </div>
               {project.verification_status === 'verifie' && (
-                <div style={{ fontSize: 11, color: 'var(--success)' }}>✓ Vérifié</div>
+                <div style={{ fontSize: 11, color: 'var(--success)' }}>Verifie</div>
               )}
             </div>
           </div>
@@ -110,22 +165,28 @@ export default function Projects() {
       setProjects(res.data.projects);
       setTotal(res.data.total);
       setPages(res.data.pages);
-    } catch { toast.error('Erreur de chargement'); }
+    } catch {
+      toast.error('Erreur de chargement');
+    }
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, [page, filters]);
+  useEffect(() => {
+    void load();
+  }, [page, filters]);
 
   const handleFavorite = async (id) => {
     if (!user) return toast.error('Connectez-vous');
     try {
       const res = await api.post(`/projects/${id}/favorite`);
-      toast.success(res.data.favorited ? 'Ajouté aux favoris' : 'Retiré des favoris');
-    } catch { toast.error('Erreur'); }
+      toast.success(res.data.favorited ? 'Ajoute aux favoris' : 'Retire des favoris');
+    } catch {
+      toast.error('Erreur');
+    }
   };
 
   const displayed = search
-    ? projects.filter(p => p.title.toLowerCase().includes(search.toLowerCase()) || p.sector?.toLowerCase().includes(search.toLowerCase()))
+    ? projects.filter((p) => p.title.toLowerCase().includes(search.toLowerCase()) || p.sector?.toLowerCase().includes(search.toLowerCase()))
     : projects;
 
   return (
@@ -136,35 +197,40 @@ export default function Projects() {
           <p style={{ color: 'var(--text-2)', marginTop: 8 }}>{total} projets disponibles</p>
         </div>
 
-        {/* Search & Filters */}
         <div className="card" style={{ marginBottom: 32 }}>
           <div className="project-filters">
             <div className="project-search-field">
               <div style={{ position: 'relative' }}>
                 <Search size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} />
-                <input className="input" placeholder="Rechercher un projet..." value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft: 38 }} />
+                <input className="input" placeholder="Rechercher un projet..." value={search} onChange={(e) => setSearch(e.target.value)} style={{ paddingLeft: 38 }} />
               </div>
             </div>
             <div className="project-filter-field">
-              <select className="input" value={filters.sector} onChange={e => setFilters(f => ({ ...f, sector: e.target.value }))}>
+              <select className="input" value={filters.sector} onChange={(e) => setFilters((f) => ({ ...f, sector: e.target.value }))}>
                 <option value="">Tous secteurs</option>
-                {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
+                {SECTORS.map((sector) => (
+                  <option key={sector} value={sector}>
+                    {sector}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="project-filter-field">
-              <select className="input" value={filters.status} onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}>
+              <select className="input" value={filters.status} onChange={(e) => setFilters((f) => ({ ...f, status: e.target.value }))}>
                 <option value="">Tous statuts</option>
-                <option value="publié">Publié</option>
+                <option value="publie">Publie</option>
+                <option value="publié">Publie</option>
                 <option value="en_recherche">En recherche</option>
-                <option value="financé">Financé</option>
+                <option value="finance">Finance</option>
+                <option value="financé">Finance</option>
               </select>
             </div>
             <div className="project-filter-field">
-              <select className="input" value={filters.sort} onChange={e => setFilters(f => ({ ...f, sort: e.target.value }))}>
-                <option value="recent">Plus récents</option>
+              <select className="input" value={filters.sort} onChange={(e) => setFilters((f) => ({ ...f, sort: e.target.value }))}>
+                <option value="recent">Plus recents</option>
                 <option value="popular">Populaires</option>
-                <option value="amount_desc">Montant ↓</option>
-                <option value="amount_asc">Montant ↑</option>
+                <option value="amount_desc">Montant desc</option>
+                <option value="amount_asc">Montant asc</option>
               </select>
             </div>
           </div>
@@ -179,19 +245,27 @@ export default function Projects() {
         ) : displayed.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-3)' }}>
             <Search size={48} style={{ margin: '0 auto 16px', display: 'block', opacity: 0.3 }} />
-            <p>Aucun projet trouvé</p>
+            <p>Aucun projet trouve</p>
           </div>
         ) : (
           <>
             <div className="project-grid">
-              {displayed.map(p => <ProjectCard key={p.id} project={p} onFavorite={handleFavorite} />)}
+              {displayed.map((project) => (
+                <ProjectCard key={project.id} project={project} onFavorite={handleFavorite} />
+              ))}
             </div>
 
             {pages > 1 && (
               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginTop: 40 }}>
-                <button className="btn btn-outline btn-sm" disabled={page === 1} onClick={() => setPage(p => p - 1)}><ChevronLeft size={16} /></button>
-                <span style={{ color: 'var(--text-2)', fontSize: 14 }}>Page {page} / {pages}</span>
-                <button className="btn btn-outline btn-sm" disabled={page === pages} onClick={() => setPage(p => p + 1)}><ChevronRight size={16} /></button>
+                <button className="btn btn-outline btn-sm" disabled={page === 1} onClick={() => setPage((p) => p - 1)}>
+                  <ChevronLeft size={16} />
+                </button>
+                <span style={{ color: 'var(--text-2)', fontSize: 14 }}>
+                  Page {page} / {pages}
+                </span>
+                <button className="btn btn-outline btn-sm" disabled={page === pages} onClick={() => setPage((p) => p + 1)}>
+                  <ChevronRight size={16} />
+                </button>
               </div>
             )}
           </>

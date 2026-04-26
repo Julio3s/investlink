@@ -3,12 +3,12 @@ import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import { getFileUrl } from '../utils/fileUrl';
 import toast from 'react-hot-toast';
-import { User, Shield, Upload, CheckCircle, Clock, XCircle, Star } from 'lucide-react';
+import { User, Shield, Upload, CheckCircle, Clock, XCircle, Star, LogOut } from 'lucide-react';
 
 const TRUST_LABEL = (s) => s >= 70 ? ['Élevé','var(--success)'] : s >= 40 ? ['Moyen','var(--gold)'] : ['Faible','var(--danger)'];
 
 export default function Profile() {
-  const { user, refreshUser } = useAuth();
+  const { user, refreshUser, logout } = useAuth();
   const [tab, setTab] = useState('profile');
   const [form, setForm] = useState({ first_name: user?.first_name||'', last_name: user?.last_name||'', phone: user?.phone||'', country: user?.country||'', bio: user?.bio||'' });
   const [avatarFile, setAvatarFile] = useState(null);
@@ -65,6 +65,15 @@ export default function Profile() {
     <div className="page">
       <div className="container" style={{ maxWidth: 800 }}>
         <h1 className="section-title" style={{ marginBottom: 32 }}>Mon profil</h1>
+
+        <div className="responsive-row" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+          <p style={{ color: 'var(--text-2)', fontSize: 14 }}>
+            Gérez votre profil, vos documents et votre session.
+          </p>
+          <button type="button" className="btn btn-ghost btn-sm mobile-full-width" onClick={logout} style={{ color: 'var(--danger)' }}>
+            <LogOut size={15} /> Déconnexion
+          </button>
+        </div>
 
         {/* Tabs */}
         <div className="responsive-row" style={{ marginBottom: 32, borderBottom: '1px solid var(--border)', paddingBottom: 16 }}>

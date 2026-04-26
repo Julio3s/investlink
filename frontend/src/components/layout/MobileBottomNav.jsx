@@ -25,11 +25,11 @@ const getItems = (user) => {
     { to: '/projects', label: 'Explorer', icon: Search },
     { to: '/messages', label: 'Messages', icon: MessageSquare },
     { to: '/notifications', label: 'Alerts', icon: Bell },
+    { to: '/profile', label: 'Profil', icon: User },
   ];
 
   if (user.role === 'porteur') items.push({ to: '/my-projects', label: 'Projets', icon: Briefcase });
   else if (user.role === 'admin') items.push({ to: '/admin', label: 'Admin', icon: LayoutDashboard });
-  else items.push({ to: '/profile', label: 'Profil', icon: User });
 
   return items;
 };

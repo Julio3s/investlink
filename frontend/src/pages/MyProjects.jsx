@@ -1,25 +1,38 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../utils/api';
-import { getFileUrl } from '../utils/fileUrl';
-import toast from 'react-hot-toast';
-import { Plus, Edit, Trash2, Eye, TrendingUp } from 'lucide-react';
+import { Edit, Eye, Plus, Trash2, TrendingUp } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import toast from 'react-hot-toast';
+import api from '../utils/api';
+import CoverImage from '../components/common/CoverImage';
 
-const STATUS_COLOR = { brouillon: '#5a6278', publié: '#3b82f6', en_recherche: '#f59e0b', financé: '#10b981' };
-const STATUS_LABEL = { brouillon: 'Brouillon', publié: 'Publié', en_recherche: 'En recherche', financé: 'Financé' };
+const STATUS_COLOR = { brouillon: '#5a6278', publie: '#3b82f6', 'publié': '#3b82f6', en_recherche: '#f59e0b', finance: '#10b981', 'financé': '#10b981' };
+const STATUS_LABEL = { brouillon: 'Brouillon', publie: 'Publie', 'publié': 'Publie', en_recherche: 'En recherche', finance: 'Finance', 'financé': 'Finance' };
 
 export default function MyProjects() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const load = () => api.get('/projects/my').then(r => { setProjects(r.data); setLoading(false); });
-  useEffect(() => { load(); }, []);
+  const load = () =>
+    api.get('/projects/my').then((r) => {
+      setProjects(r.data);
+      setLoading(false);
+    });
+
+  useEffect(() => {
+    void load();
+  }, []);
 
   const del = async (id) => {
     if (!confirm('Supprimer ce projet ?')) return;
-    try { await api.delete(`/projects/${id}`); toast.success('Projet supprimé'); load(); } catch { toast.error('Erreur'); }
+    try {
+      await api.delete(`/projects/${id}`);
+      toast.success('Projet supprime');
+      void load();
+    } catch {
+      toast.error('Erreur');
+    }
   };
 
   return (
@@ -28,46 +41,77 @@ export default function MyProjects() {
         <div className="responsive-row" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
           <div>
             <h1 className="section-title">Mes projets</h1>
-            <p style={{ color: 'var(--text-2)', marginTop: 6 }}>{projects.length} projet(s) créé(s)</p>
+            <p style={{ color: 'var(--text-2)', marginTop: 6 }}>{projects.length} projet(s) cree(s)</p>
           </div>
-          <Link to="/projects/new" className="btn btn-primary"><Plus size={16} /> Nouveau projet</Link>
+          <Link to="/projects/new" className="btn btn-primary">
+            <Plus size={16} /> Nouveau projet
+          </Link>
         </div>
 
-        {loading ? <div className="card loading-pulse" style={{ height: 200 }} /> : projects.length === 0 ? (
+        {loading ? (
+          <div className="card loading-pulse" style={{ height: 200 }} />
+        ) : projects.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 0' }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>🚀</div>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>Projet</div>
             <h3 style={{ fontWeight: 700, marginBottom: 12 }}>Aucun projet</h3>
-            <p style={{ color: 'var(--text-2)', marginBottom: 24 }}>Créez votre premier projet pour trouver des investisseurs</p>
-            <Link to="/projects/new" className="btn btn-primary"><Plus size={16} /> Créer un projet</Link>
+            <p style={{ color: 'var(--text-2)', marginBottom: 24 }}>Creez votre premier projet pour trouver des investisseurs</p>
+            <Link to="/projects/new" className="btn btn-primary">
+              <Plus size={16} /> Creer un projet
+            </Link>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {projects.map(p => (
-              <div key={p.id} className="card responsive-row" style={{ alignItems: 'center' }}>
-                <div style={{ width: 56, height: 56, borderRadius: 14, background: p.image_url ? `url(${getFileUrl(p.image_url)}) center/cover` : 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.15))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0 }}>
-                  {!p.image_url && '🚀'}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-                    <h3 style={{ fontWeight: 700 }}>{p.title}</h3>
-                    <span style={{ background: STATUS_COLOR[p.status] + '20', color: STATUS_COLOR[p.status], borderRadius: 999, padding: '2px 10px', fontSize: 11, fontWeight: 600 }}>
-                      {STATUS_LABEL[p.status]}
-                    </span>
-                    {p.is_validated && <span className="badge badge-verified" style={{ fontSize: 11 }}>✓ Validé</span>}
+            {projects.map((project) => {
+              const statusColor = STATUS_COLOR[project.status] || '#3b82f6';
+              const statusLabel = STATUS_LABEL[project.status] || project.status;
+
+              return (
+                <div key={project.id} className="card responsive-row" style={{ alignItems: 'center' }}>
+                  <div style={{ width: 56, height: 56, borderRadius: 14, overflow: 'hidden', flexShrink: 0, background: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.15))' }}>
+                    <CoverImage
+                      src={project.image_url}
+                      alt={project.title}
+                      style={{ width: '100%', height: '100%' }}
+                      imgStyle={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      fallback={
+                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700 }}>
+                          Img
+                        </div>
+                      }
+                    />
                   </div>
-                  <div style={{ display: 'flex', gap: 16, fontSize: 13, color: 'var(--text-3)' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Eye size={12} /> {p.views_count} vues</span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><TrendingUp size={12} /> {Number(p.amount_sought).toLocaleString('fr-FR')} €</span>
-                    <span>{formatDistanceToNow(new Date(p.created_at), { addSuffix: true, locale: fr })}</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4, flexWrap: 'wrap' }}>
+                      <h3 style={{ fontWeight: 700 }}>{project.title}</h3>
+                      <span style={{ background: `${statusColor}20`, color: statusColor, borderRadius: 999, padding: '2px 10px', fontSize: 11, fontWeight: 600 }}>
+                        {statusLabel}
+                      </span>
+                      {project.is_validated && <span className="badge badge-verified" style={{ fontSize: 11 }}>Valide</span>}
+                    </div>
+                    <div style={{ display: 'flex', gap: 16, fontSize: 13, color: 'var(--text-3)', flexWrap: 'wrap' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <Eye size={12} /> {project.views_count} vues
+                      </span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <TrendingUp size={12} /> {Number(project.amount_sought).toLocaleString('fr-FR')} EUR
+                      </span>
+                      <span>{formatDistanceToNow(new Date(project.created_at), { addSuffix: true, locale: fr })}</span>
+                    </div>
+                  </div>
+                  <div className="responsive-row">
+                    <Link to={`/projects/${project.id}`} className="btn btn-ghost btn-sm">
+                      <Eye size={14} />
+                    </Link>
+                    <Link to={`/projects/${project.id}/edit`} className="btn btn-outline btn-sm">
+                      <Edit size={14} />
+                    </Link>
+                    <button className="btn btn-danger btn-sm" onClick={() => void del(project.id)}>
+                      <Trash2 size={14} />
+                    </button>
                   </div>
                 </div>
-                <div className="responsive-row">
-                  <Link to={`/projects/${p.id}`} className="btn btn-ghost btn-sm"><Eye size={14} /></Link>
-                  <Link to={`/projects/${p.id}/edit`} className="btn btn-outline btn-sm"><Edit size={14} /></Link>
-                  <button className="btn btn-danger btn-sm" onClick={() => del(p.id)}><Trash2 size={14} /></button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

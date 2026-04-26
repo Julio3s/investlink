@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Bell, MessageSquare, LayoutDashboard, LogOut, User, Briefcase, Search } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import api from '../../utils/api';
-import { getFileUrl } from '../../utils/fileUrl';
+import Avatar from '../common/Avatar';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -75,17 +75,12 @@ export default function Navbar() {
                   onClick={() => setShowMenu(!showMenu)}
                   style={{ gap: 8 }}
                 >
-                  <div style={{
-                    width: 28, height: 28, borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 12, fontWeight: 700, color: 'white',
-                    overflow: 'hidden',
-                  }}>
-                    {user.avatar_url
-                      ? <img src={getFileUrl(user.avatar_url)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      : (user.first_name?.[0] || 'U')}
-                  </div>
+                  <Avatar
+                    src={user.avatar_url}
+                    name={user.first_name || 'U'}
+                    size={28}
+                    textStyle={{ fontSize: 12 }}
+                  />
                   <span className="nav-user-label">{user.first_name}</span>
                 </button>
                 {showMenu && (
