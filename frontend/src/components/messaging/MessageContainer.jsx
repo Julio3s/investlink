@@ -6,12 +6,29 @@ import TypingIndicator from './TypingIndicator';
 export default function MessageContainer({ items, currentUserId, typingName, typing, onCopy, onDelete, onEdit, onOpenAttachment, onLoadOlder }) {
   const scrollRef = useRef(null);
   const topAnchorRef = useRef(null);
+  const shouldStickToBottomRef = useRef(true);
 
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    el.scrollTop = el.scrollHeight;
+    if (shouldStickToBottomRef.current) {
+      el.scrollTop = el.scrollHeight;
+    }
   }, [items.length]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return undefined;
+
+    const handleScroll = () => {
+      const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+      shouldStickToBottomRef.current = distanceFromBottom < 80;
+    };
+
+    handleScroll();
+    el.addEventListener('scroll', handleScroll);
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -20,7 +37,7 @@ export default function MessageContainer({ items, currentUserId, typingName, typ
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0]?.isIntersecting) {
+        if (entries[0]?.isIntersecting && el.scrollTop <= 24) {
           onLoadOlder();
         }
       },

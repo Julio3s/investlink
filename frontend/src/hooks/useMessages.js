@@ -9,10 +9,22 @@ export function useMessages(conversationId, currentUserId) {
   const [hasMore, setHasMore] = useState(false);
   const [sending, setSending] = useState(false);
   const cursorRef = useRef(null);
+  const loadingRef = useRef(false);
+
+  const mergeUniqueMessages = useCallback((rows) => {
+    const seen = new Set();
+    return rows.filter((message) => {
+      if (!message?.id || seen.has(message.id)) return false;
+      seen.add(message.id);
+      return true;
+    });
+  }, []);
 
   const loadMessages = useCallback(async (mode = 'replace') => {
-    if (!conversationId) return;
+    if (!conversationId || loadingRef.current) return;
+    if (mode === 'prepend' && (!cursorRef.current || !hasMore)) return;
 
+    loadingRef.current = true;
     mode === 'prepend' ? setLoadingMore(true) : setLoading(true);
     setError(null);
 
@@ -22,27 +34,30 @@ export function useMessages(conversationId, currentUserId) {
         before: mode === 'prepend' ? cursorRef.current : undefined,
       });
 
-      const ordered = [...rows].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      const ordered = mergeUniqueMessages([...rows].sort((a, b) => new Date(a.created_at) - new Date(b.created_at)));
       if (mode === 'prepend') {
-        setMessages((prev) => [...ordered, ...prev]);
+        setMessages((prev) => mergeUniqueMessages([...ordered, ...prev]));
       } else {
         setMessages(ordered);
       }
 
       const oldest = ordered[0];
-      cursorRef.current = oldest?.created_at || cursorRef.current;
-      setHasMore(ordered.length === 30);
+      cursorRef.current = oldest?.created_at || null;
+      setHasMore(rows.length === 30 && ordered.length > 0);
     } catch (err) {
       setError(err);
     } finally {
+      loadingRef.current = false;
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [conversationId]);
+  }, [conversationId, hasMore, mergeUniqueMessages]);
 
   useEffect(() => {
     cursorRef.current = null;
+    loadingRef.current = false;
     setMessages([]);
+    setHasMore(false);
     if (!conversationId) return;
     void loadMessages('replace');
   }, [conversationId, loadMessages]);
@@ -70,7 +85,7 @@ export function useMessages(conversationId, currentUserId) {
         content,
         file,
       });
-      setMessages((prev) => prev.map((msg) => (msg.id === optimistic.id ? saved : msg)));
+      setMessages((prev) => mergeUniqueMessages(prev.map((msg) => (msg.id === optimistic.id ? saved : msg))));
       return saved;
     } catch (err) {
       setMessages((prev) => prev.filter((msg) => msg.id !== optimistic.id));
@@ -78,7 +93,7 @@ export function useMessages(conversationId, currentUserId) {
     } finally {
       setSending(false);
     }
-  }, [conversationId, currentUserId]);
+  }, [conversationId, currentUserId, mergeUniqueMessages]);
 
   const grouped = useMemo(() => {
     const groups = [];
@@ -104,7 +119,11 @@ export function useMessages(conversationId, currentUserId) {
     error,
     hasMore,
     sending,
-    loadMore: () => loadMessages('prepend'),
+    loadMore: () => {
+      if (!loadingRef.current && hasMore) {
+        void loadMessages('prepend');
+      }
+    },
     loadMessages,
     send,
     setMessages,

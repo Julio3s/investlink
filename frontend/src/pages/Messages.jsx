@@ -25,6 +25,7 @@ export default function Messages() {
   const [input, setInput] = useState('');
   const [mobile, setMobile] = useState(() => window.innerWidth < 768);
   const [showContact, setShowContact] = useState(false);
+  const [hydratingConversation, setHydratingConversation] = useState(false);
 
   const { conversations, search, setSearch, loading, error, reload, unreadCount, setConversations } = useConversations();
   const { groupedMessages, loading: messagesLoading, sending, send, loadMore, setMessages } = useMessages(activeConversation?.id, user.id);
@@ -42,14 +43,9 @@ export default function Messages() {
     if (!conversationId) {
       setActiveConversation(null);
       setShowContact(false);
-      return;
+      setHydratingConversation(false);
     }
-
-    const current = conversations.find((conv) => conv.id === conversationId);
-    if (current) {
-      setActiveConversation(current);
-    }
-  }, [conversationId, conversations]);
+  }, [conversationId]);
 
   useEffect(() => {
     if (!activeConversation?.id) return;
@@ -62,9 +58,15 @@ export default function Messages() {
   }, [activeConversation?.id, reload]);
 
   const selectConversation = async (conversation) => {
+    if (!conversation?.id) return;
+
     setActiveConversation(conversation);
     setShowContact(!mobile);
-    navigate(`/messages/${conversation.id}`, { replace: true });
+    setHydratingConversation(true);
+
+    if (conversationId !== conversation.id) {
+      navigate(`/messages/${conversation.id}`, { replace: true });
+    }
 
     try {
       const rows = await messageService.fetchMessages(conversation.id, { limit: 30 });
@@ -74,15 +76,17 @@ export default function Messages() {
       setConversations(next);
     } catch {
       toast.error('Erreur de chargement');
+    } finally {
+      setHydratingConversation(false);
     }
   };
 
   useEffect(() => {
     const current = conversations.find((conv) => conv.id === conversationId);
-    if (current && current.id !== activeConversation?.id) {
+    if (current && current.id !== activeConversation?.id && !hydratingConversation) {
       void selectConversation(current);
     }
-  }, [conversationId, conversations]);
+  }, [conversationId, conversations, activeConversation?.id, hydratingConversation]);
 
   const contact = useMemo(() => {
     if (!activeConversation) return null;
