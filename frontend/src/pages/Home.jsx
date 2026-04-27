@@ -71,8 +71,8 @@ function HeroStats() {
     <div className="stats-row" style={{ marginTop: 40, alignItems: 'center' }}>
       {STATS.map(({ value, label, icon: Icon }) => (
         <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <Icon size={18} style={{ color: '#f5d782' }} />
+          <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(255,255,255,0.58)', border: '1px solid rgba(201,154,46,0.28)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 10px 24px rgba(24,49,83,0.08)' }}>
+            <Icon size={18} style={{ color: '#c99a2e' }} />
           </div>
           <div>
             <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.03em' }}>{value}</div>
@@ -101,7 +101,7 @@ function FeatureCard({ icon: Icon, title, desc, color }) {
 function ProjectPreview({ project }) {
   return (
     <Link to={`/projects/${project.id}`} className="card project-card glow-card">
-      <div style={{ height: 180, position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, rgba(212,168,83,0.14), rgba(139,105,20,0.08))' }}>
+      <div style={{ height: 180, position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, rgba(31,95,191,0.16), rgba(201,154,46,0.14))' }}>
         <CoverImage
           src={project.image_url}
           alt={project.title}
@@ -109,7 +109,7 @@ function ProjectPreview({ project }) {
           imgStyle={{ width: '100%', height: '100%', objectFit: 'cover' }}
           fallback={<div style={{ width: '100%', height: '100%' }} />}
         />
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 35%, rgba(10,10,11,0.84) 100%)' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 35%, rgba(24,49,83,0.72) 100%)' }} />
         <div style={{ position: 'absolute', left: 16, right: 16, bottom: 16, display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
           <span className="badge badge-sector">{project.sector || 'Général'}</span>
           {project.status && <span className="badge badge-pending">{project.status}</span>}
@@ -205,19 +205,19 @@ export default function Home() {
               </div>
               <div className="responsive-stats-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 16 }}>
                 <div className="card">
-                  <div style={{ fontSize: 28, fontWeight: 800, color: '#d4a853' }}>{dashboardStats.projetsVues || 0}</div>
+                  <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--gold)' }}>{dashboardStats.projetsVues || 0}</div>
                   <div style={{ color: 'var(--text-2)', fontSize: 12 }}>Consultations</div>
                 </div>
                 <div className="card">
-                  <div style={{ fontSize: 28, fontWeight: 800, color: '#d4a853' }}>{dashboardStats.messages || 0}</div>
+                  <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--gold)' }}>{dashboardStats.messages || 0}</div>
                   <div style={{ color: 'var(--text-2)', fontSize: 12 }}>Messages reçus</div>
                 </div>
                 <div className="card">
-                  <div style={{ fontSize: 28, fontWeight: 800, color: '#d4a853' }}>{dashboardStats.favoris || 0}</div>
+                  <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--gold)' }}>{dashboardStats.favoris || 0}</div>
                   <div style={{ color: 'var(--text-2)', fontSize: 12 }}>Projets suivis</div>
                 </div>
                 <div className="card">
-                  <div style={{ fontSize: 28, fontWeight: 800, color: '#d4a853' }}>{dashboardStats.scoreConfiance || 0}%</div>
+                  <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--gold)' }}>{dashboardStats.scoreConfiance || 0}%</div>
                   <div style={{ color: 'var(--text-2)', fontSize: 12 }}>Indice de confiance</div>
                 </div>
               </div>
@@ -280,7 +280,7 @@ export default function Home() {
           <section className="home-hero" style={{ minHeight: '88vh', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden', padding: '80px 0' }}>
             <div className="container" style={{ position: 'relative', zIndex: 1 }}>
               <div className="animate-in" style={{ maxWidth: 760 }}>
-                <div className="badge" style={{ marginBottom: 24, fontSize: 13, background: '#050507', color: 'white', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div className="badge" style={{ marginBottom: 24, fontSize: 13, background: 'rgba(255,255,255,0.82)', color: 'var(--primary)', border: '1px solid rgba(31,95,191,0.16)', boxShadow: '0 12px 30px rgba(24,49,83,0.08)' }}>
                   <Shield size={12} /> La rigueur avant l&apos;enthousiasme
                 </div>
 
@@ -322,7 +322,7 @@ export default function Home() {
 
           <section style={{ padding: '80px 0', borderTop: '1px solid var(--border)' }}>
             <div className="container">
-              <div style={{ background: '#050507', border: '1px solid rgba(139,105,20,0.35)', borderRadius: 24, padding: '60px 40px', textAlign: 'center' }}>
+              <div style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.96), rgba(237,244,255,0.96))', border: '1px solid rgba(201,154,46,0.26)', borderRadius: 24, padding: '60px 40px', textAlign: 'center', boxShadow: '0 24px 60px rgba(24,49,83,0.08)' }}>
                 <h2 style={{ fontSize: 36, fontWeight: 800, letterSpacing: '-0.03em', marginBottom: 16 }}>
                   Prenez une décision éclairée
                 </h2>
