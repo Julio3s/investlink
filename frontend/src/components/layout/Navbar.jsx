@@ -22,9 +22,10 @@ export default function Navbar() {
   return (
     <nav className="site-nav" style={{
       position: 'sticky', top: 0, zIndex: 100,
-      background: 'rgba(10, 13, 20, 0.92)',
+      background: 'rgba(248, 251, 255, 0.88)',
       backdropFilter: 'blur(20px)',
       borderBottom: '1px solid var(--border)',
+      boxShadow: '0 10px 30px rgba(24, 49, 83, 0.06)',
       height: '70px',
     }}>
       <div className="container nav-shell">
