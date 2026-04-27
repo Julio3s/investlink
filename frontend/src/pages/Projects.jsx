@@ -120,7 +120,7 @@ function ProjectCard({ project, onFavorite }) {
         <div className="project-card-footer">
           <div>
             <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: '-0.03em' }}>
-              {Number(project.amount_sought).toLocaleString('fr-FR')} EUR
+              {Number(project.amount_sought).toLocaleString('fr-FR')} {project.currency_code || 'USD'}
             </div>
             <div style={{ fontSize: 11, color: 'var(--text-3)' }}>Recherche</div>
           </div>

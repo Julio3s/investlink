@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const pool = require('../config/db');
 const { uploadBuffer } = require('../utils/cloudinary');
+const { ensureWalletForUser } = require('./walletController');
 
 const generateToken = (user) =>
   jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
@@ -33,6 +34,7 @@ const register = async (req, res) => {
     );
 
     const user = result.rows[0];
+    await ensureWalletForUser(user.id);
     const token = generateToken(user);
 
     res.status(201).json({
@@ -161,7 +163,7 @@ const getMemberProfile = async (req, res) => {
     }
 
     const projects = await pool.query(
-      `SELECT id, title, sector, country, amount_sought, image_url, status, created_at
+      `SELECT id, title, sector, country, amount_sought, currency_code, image_url, status, created_at
        FROM projects
        WHERE owner_id = $1 AND status != 'brouillon'
        ORDER BY created_at DESC`,

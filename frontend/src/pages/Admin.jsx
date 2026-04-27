@@ -247,12 +247,24 @@ export default function Admin() {
                   ))}
                 </div>
 
+                <div className="card" style={{ marginBottom: 24 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                    <Monitor size={16} style={{ color: 'var(--primary)' }} />
+                    <strong>Identificateur visiteur</strong>
+                  </div>
+                  <p style={{ color: 'var(--text-2)', fontSize: 14, lineHeight: 1.6, margin: 0 }}>
+                    Chaque navigateur reçoit un identifiant de session généré par la plateforme. Quand le visiteur est connecté,
+                    cet identifiant se rattache aussi à son compte InvestLink. Pour un visiteur anonyme, il reste lié au
+                    navigateur, à l&apos;IP et à l&apos;appareil observés.
+                  </p>
+                </div>
+
                 <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
                   <div style={{ overflowX: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                       <thead>
                         <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                          {['Visiteur', 'Appareil', 'IP', 'Sessions', 'Dernière page', 'Dernière activité'].map((h) => (
+                          {['Visiteur', 'ID navigateur', 'Appareil', 'IP', 'Sessions', 'Dernière page', 'Dernière activité'].map((h) => (
                             <th
                               key={h}
                               style={{
@@ -280,9 +292,11 @@ export default function Admin() {
                           >
                             <td style={{ padding: '12px 16px' }}>
                               <div style={{ fontWeight: 700 }}>{session.visitor_name}</div>
-                              <div style={{ color: 'var(--text-3)', fontSize: 12 }}>
-                                {session.user_email || 'Visiteur non identifié'}
-                              </div>
+                              <div style={{ color: 'var(--text-3)', fontSize: 12 }}>{session.user_email || 'Visiteur non identifié'}</div>
+                            </td>
+                            <td style={{ padding: '12px 16px', color: 'var(--text-2)', fontSize: 13 }}>
+                              <div style={{ fontWeight: 700 }}>{session.visitor_id || '—'}</div>
+                              <div style={{ color: 'var(--text-3)', fontSize: 12, marginTop: 4 }}>Trace locale du navigateur</div>
                             </td>
                             <td style={{ padding: '12px 16px', color: 'var(--text-2)', fontSize: 13 }}>
                               {session.device_name || 'Appareil inconnu'}

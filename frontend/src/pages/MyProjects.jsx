@@ -93,7 +93,7 @@ export default function MyProjects() {
                         <Eye size={12} /> {project.views_count} vues
                       </span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <TrendingUp size={12} /> {Number(project.amount_sought).toLocaleString('fr-FR')} EUR
+                        <TrendingUp size={12} /> {Number(project.amount_sought).toLocaleString('fr-FR')} {project.currency_code || 'USD'}
                       </span>
                       <span>{formatDistanceToNow(new Date(project.created_at), { addSuffix: true, locale: fr })}</span>
                     </div>

@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Bell, MessageSquare, LayoutDashboard, LogOut, User, Briefcase, Search, Users } from 'lucide-react';
+import { Bell, MessageSquare, LayoutDashboard, LogOut, User, Briefcase, Search, Users, Wallet } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import api from '../../utils/api';
 import Avatar from '../common/Avatar';
@@ -36,11 +36,15 @@ export default function Navbar() {
         </Link>
 
         <div className="nav-actions">
-          <Link to="/projects" className="btn btn-ghost btn-sm nav-icon-btn" title="Explorer">
-            <Search size={15} />
-            <span className="nav-user-label mobile-hide">Explorer</span>
-          </Link>
-          {user ? (
+              <Link to="/projects" className="btn btn-ghost btn-sm nav-icon-btn" title="Explorer">
+                <Search size={15} />
+                <span className="nav-user-label mobile-hide">Explorer</span>
+              </Link>
+              <Link to="/wallet" className="btn btn-ghost btn-sm nav-icon-btn" title="Portefeuille">
+                <Wallet size={15} />
+                <span className="nav-user-label mobile-hide">Portefeuille</span>
+              </Link>
+              {user ? (
             <>
               {user.role === 'porteur' && (
                 <Link to="/my-projects" className="btn btn-ghost btn-sm nav-icon-btn" title="Mes projets">

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getVisitorId } from './visitor';
 
 // Utiliser l'URL complète du backend (pas de proxy sur Static Site)
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -11,6 +12,7 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) config.headers.Authorization = `Bearer ${token}`;
+  config.headers['x-visitor-id'] = getVisitorId();
   return config;
 });
 

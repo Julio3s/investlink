@@ -280,7 +280,7 @@ export default function ProjectDetail() {
             <div className="card" style={{ textAlign: 'center', background: 'linear-gradient(135deg, rgba(212,168,83,0.08), rgba(139,105,20,0.05))', borderColor: 'rgba(212,168,83,0.2)' }}>
               <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-3)', marginBottom: 8 }}>Montant recherche</div>
               <div style={{ fontSize: 36, fontWeight: 800, letterSpacing: '-0.04em' }}>
-                {Number(project.amount_sought).toLocaleString('fr-FR')} EUR
+                {Number(project.amount_sought).toLocaleString('fr-FR')} {project.currency_code || 'USD'}
               </div>
               {user?.role === 'investisseur' && user.id !== project.owner_id && (
                 <button className="btn btn-primary mobile-full-width" onClick={handleContact} disabled={contacting} style={{ width: '100%', justifyContent: 'center', marginTop: 20 }}>

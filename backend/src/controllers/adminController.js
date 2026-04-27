@@ -82,6 +82,7 @@ const getSessions = async (req, res) => {
       pool.query(
         `SELECT
           s.session_key AS id,
+          s.visitor_id,
           s.user_id,
           COALESCE(u.first_name || ' ' || u.last_name, 'Visiteur') AS visitor_name,
           u.email AS user_email,

@@ -29,13 +29,19 @@ const getDeviceName = (userAgent = '') => {
 };
 
 const getSessionKey = (req) => {
+  const visitorId = req.headers['x-visitor-id'];
   const userAgent = req.headers['user-agent'] || 'unknown';
   const ipAddress = getIpAddress(req);
   const userPart = req.user?.id || 'anon';
+  if (typeof visitorId === 'string' && visitorId.trim()) {
+    return `visitor:${visitorId.trim()}`;
+  }
+
   return `${userPart}:${ipAddress}:${userAgent}`;
 };
 
 const persistSession = async (req, { userId = null, increment = true } = {}) => {
+  const visitorId = typeof req.headers['x-visitor-id'] === 'string' ? req.headers['x-visitor-id'].trim() : null;
   const userAgent = req.headers['user-agent'] || 'unknown';
   const ipAddress = getIpAddress(req);
   const sessionKey = getSessionKey(req);
@@ -44,9 +50,10 @@ const persistSession = async (req, { userId = null, increment = true } = {}) => 
   if (increment) {
     await pool.query(
       `INSERT INTO analytics_sessions (
-        session_key, user_id, ip_address, user_agent, device_name, last_path, last_method, is_authenticated
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+        session_key, visitor_id, user_id, ip_address, user_agent, device_name, last_path, last_method, is_authenticated
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
       ON CONFLICT (session_key) DO UPDATE SET
+        visitor_id = COALESCE(EXCLUDED.visitor_id, analytics_sessions.visitor_id),
         user_id = COALESCE(EXCLUDED.user_id, analytics_sessions.user_id),
         ip_address = EXCLUDED.ip_address,
         user_agent = EXCLUDED.user_agent,
@@ -58,6 +65,7 @@ const persistSession = async (req, { userId = null, increment = true } = {}) => 
         last_seen_at = NOW()`,
       [
         sessionKey,
+        visitorId,
         userId,
         ipAddress,
         userAgent,
@@ -72,9 +80,10 @@ const persistSession = async (req, { userId = null, increment = true } = {}) => 
 
   await pool.query(
     `INSERT INTO analytics_sessions (
-      session_key, user_id, ip_address, user_agent, device_name, last_path, last_method, is_authenticated
-    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+      session_key, visitor_id, user_id, ip_address, user_agent, device_name, last_path, last_method, is_authenticated
+    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
     ON CONFLICT (session_key) DO UPDATE SET
+      visitor_id = COALESCE(EXCLUDED.visitor_id, analytics_sessions.visitor_id),
       user_id = COALESCE(EXCLUDED.user_id, analytics_sessions.user_id),
       ip_address = EXCLUDED.ip_address,
       user_agent = EXCLUDED.user_agent,
@@ -85,6 +94,7 @@ const persistSession = async (req, { userId = null, increment = true } = {}) => 
       last_seen_at = NOW()`,
     [
       sessionKey,
+      visitorId,
       userId,
       ipAddress,
       userAgent,

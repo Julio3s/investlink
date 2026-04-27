@@ -16,6 +16,8 @@ import Profile from './pages/Profile';
 import PublicProfile from './pages/PublicProfile';
 import Admin from './pages/Admin';
 import Notifications from './pages/Notifications';
+import Wallet from './pages/Wallet';
+import WalletOperation from './pages/WalletOperation';
 
 const PrivateRoute = ({ children, roles }) => {
   const { user } = useAuth();
@@ -73,6 +75,16 @@ function AppRoutes() {
         <Route path="/profile" element={
           <PrivateRoute>
             <Profile />
+          </PrivateRoute>
+        } />
+        <Route path="/wallet" element={
+          <PrivateRoute>
+            <Wallet />
+          </PrivateRoute>
+        } />
+        <Route path="/wallet/:operation" element={
+          <PrivateRoute>
+            <WalletOperation />
           </PrivateRoute>
         } />
         <Route path="/members/:id" element={<PublicProfile />} />

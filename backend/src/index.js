@@ -49,6 +49,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/projects', require('./routes/projects'));
 app.use('/api/kyc', require('./routes/kyc'));
+app.use('/api/wallet', require('./routes/wallet'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api', require('./routes/messaging'));
 app.use('/api', require('./routes/misc'));

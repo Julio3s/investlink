@@ -213,7 +213,7 @@ export default function PublicProfile() {
                       </div>
                       <h3 style={{ fontSize: 18, fontWeight: 700 }}>{project.title}</h3>
                       <p style={{ color: 'var(--text-2)', fontSize: 14 }}>
-                        {Number(project.amount_sought).toLocaleString('fr-FR')} EUR recherches
+                        {Number(project.amount_sought).toLocaleString('fr-FR')} {project.currency_code || 'USD'} recherches
                       </p>
                     </div>
                   </Link>

@@ -10,6 +10,7 @@ import {
   Menu,
   MessageSquare,
   Search,
+  Wallet,
   User,
   Users,
   X,
@@ -32,6 +33,7 @@ const getNavigation = (user) => {
   const primary = [
     { to: '/', label: 'Accueil', icon: Home },
     { to: '/projects', label: 'Explorer', icon: Search },
+    ...(user ? [{ to: '/wallet', label: 'Portefeuille', icon: Wallet }] : []),
     { to: '/messages', label: 'Messages', icon: MessageSquare },
   ];
 

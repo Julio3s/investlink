@@ -91,7 +91,7 @@ const createProject = async (req, res) => {
   try {
     const {
       title, problem_description, solution, target_market,
-      business_model, amount_sought, sector, country,
+      business_model, amount_sought, currency_code, sector, country,
     } = req.body;
 
     const pitchDeckFile = req.files?.pitch_deck?.[0];
@@ -108,10 +108,10 @@ const createProject = async (req, res) => {
 
     const result = await pool.query(
       `INSERT INTO projects (owner_id, title, problem_description, solution, target_market,
-       business_model, amount_sought, sector, country, pitch_deck_url, image_url)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
+       business_model, amount_sought, currency_code, sector, country, pitch_deck_url, image_url)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *`,
       [req.user.id, title, problem_description, solution, target_market,
-       business_model, amount_sought, sector, country, pitch_deck_url, image_url]
+       business_model, amount_sought, currency_code || 'USD', sector, country, pitch_deck_url, image_url]
     );
 
     res.status(201).json(result.rows[0]);
@@ -132,7 +132,7 @@ const updateProject = async (req, res) => {
     }
 
     const { title, problem_description, solution, target_market,
-      business_model, amount_sought, sector, country, status } = req.body;
+      business_model, amount_sought, currency_code, sector, country, status } = req.body;
 
     const pitchDeckFile = req.files?.pitch_deck?.[0];
     const projectImageFile = req.files?.project_image?.[0];
@@ -149,10 +149,10 @@ const updateProject = async (req, res) => {
       `UPDATE projects SET title=COALESCE($1,title), problem_description=COALESCE($2,problem_description),
        solution=COALESCE($3,solution), target_market=COALESCE($4,target_market),
        business_model=COALESCE($5,business_model), amount_sought=COALESCE($6,amount_sought),
-       sector=COALESCE($7,sector), country=COALESCE($8,country), status=COALESCE($9,status),
-       pitch_deck_url=COALESCE($10,pitch_deck_url), image_url=COALESCE($11,image_url)
-       WHERE id=$12 RETURNING *`,
-      [title, problem_description, solution, target_market, business_model, amount_sought, sector, country, status, pitch_deck_url, image_url, id]
+       currency_code=COALESCE($7,currency_code), sector=COALESCE($8,sector), country=COALESCE($9,country), status=COALESCE($10,status),
+       pitch_deck_url=COALESCE($11,pitch_deck_url), image_url=COALESCE($12,image_url)
+       WHERE id=$13 RETURNING *`,
+      [title, problem_description, solution, target_market, business_model, amount_sought, currency_code, sector, country, status, pitch_deck_url, image_url, id]
     );
 
     res.json(result.rows[0]);
