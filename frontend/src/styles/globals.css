@@ -1,31 +1,31 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --bg: #0a0a0b;
-  --bg-2: #111113;
-  --bg-3: #1a1a1e;
-  --border: #2a2a30;
-  --border-light: #4a4a52;
-  --text: #f5f5f5;
-  --text-2: #a0a0a8;
-  --text-3: #6b6b75;
-  --primary: #d4a853;
-  --primary-dark: #c49b3f;
-  --primary-glow: rgba(212, 168, 83, 0.16);
-  --gold: #d4a853;
-  --gold-light: #f5d782;
+  --bg: #fafafa;
+  --bg-2: #ffffff;
+  --bg-3: #f8fafc;
+  --border: #e5e7eb;
+  --border-light: #cbd5e1;
+  --text: #171717;
+  --text-2: #404040;
+  --text-3: #737373;
+  --primary: #3b82f6;
+  --primary-dark: #2563eb;
+  --primary-glow: rgba(59, 130, 246, 0.16);
+  --gold: #60a5fa;
+  --gold-light: #dbeafe;
   --success: #10b981;
   --danger: #ef4444;
-  --warning: #d4a853;
-  --radius: 10px;
-  --radius-lg: 14px;
-  --shadow: 0 16px 44px rgba(0,0,0,0.46);
-  --shadow-glow: 0 0 36px rgba(212, 168, 83, 0.12);
-  --font: 'Segoe UI', 'Helvetica Neue', Inter, -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-sans: 'Segoe UI', 'Helvetica Neue', Inter, -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-serif: 'Segoe UI', 'Helvetica Neue', Inter, -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
-  --transition: 0.2s ease;
+  --warning: #f59e0b;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-glow: 0 4px 12px rgba(59, 130, 246, 0.08);
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-serif: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'SFMono-Regular', 'Consolas', monospace;
+  --transition: 0.15s ease;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -47,7 +47,7 @@ button { cursor: pointer; font-family: inherit; }
 input, textarea, select { font-family: inherit; }
 
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg-2); }
+::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
 
 .container {
@@ -63,7 +63,7 @@ input, textarea, select { font-family: inherit; }
   gap: 8px;
   padding: 10px 20px;
   border-radius: var(--radius);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-weight: 600;
   font-size: 14px;
   transition: all var(--transition);
@@ -71,22 +71,21 @@ input, textarea, select { font-family: inherit; }
   white-space: nowrap;
   justify-content: center;
   min-height: 40px;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  letter-spacing: 0;
 }
 
 .btn-primary {
   background: var(--primary);
   color: white;
 }
-.btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+.btn-primary:hover { background: var(--primary-dark); }
 
 .btn-outline {
   background: transparent;
-  border: 1px solid var(--border-light);
-  color: var(--text);
+  border: 1px solid var(--primary);
+  color: var(--primary);
 }
-.btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+.btn-outline:hover { background: var(--gold-light); }
 
 .btn-ghost {
   background: transparent;
@@ -110,32 +109,33 @@ input, textarea, select { font-family: inherit; }
   border-radius: var(--radius-lg);
   padding: 24px;
   transition: border-color var(--transition);
+  box-shadow: var(--shadow);
 }
-.card:hover { border-color: var(--border-light); }
+.card:hover { border-color: #bfdbfe; box-shadow: 0 4px 12px rgba(59,130,246,0.08); }
 
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   padding: 3px 10px;
-  border-radius: 999px;
+  border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
 
-.badge-verified { background: rgba(46, 204, 113, 0.12); color: var(--success); border: 1px solid rgba(46, 204, 113, 0.24); }
-.badge-pending { background: rgba(212, 168, 83, 0.14); color: var(--warning); border: 1px solid rgba(212, 168, 83, 0.28); }
-.badge-rejected { background: rgba(231, 76, 60, 0.12); color: var(--danger); border: 1px solid rgba(231, 76, 60, 0.24); }
-.badge-sector { background: rgba(212, 168, 83, 0.12); color: var(--primary); border: 1px solid rgba(212, 168, 83, 0.22); }
+.badge-verified { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+.badge-pending { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+.badge-rejected { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+.badge-sector { background: #eff6ff; color: var(--primary); border: 1px solid #bfdbfe; }
 
 .form-group { display: flex; flex-direction: column; gap: 6px; }
 .form-group label { font-size: 13px; font-weight: 600; color: var(--text-2); letter-spacing: 0.04em; text-transform: uppercase; }
 
 .input {
-  background: var(--bg-3);
+  background: #fff;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 11px 14px;
@@ -161,7 +161,7 @@ select.input { appearance: none; background-image: url("data:image/svg+xml,%3csv
   font-size: 28px;
   font-weight: 800;
   letter-spacing: -0.02em;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
 }
 
 .hero-title {
@@ -169,7 +169,7 @@ select.input { appearance: none; background-image: url("data:image/svg+xml,%3csv
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.02;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
 }
 
 .hero-copy {
@@ -220,7 +220,7 @@ select.input { appearance: none; background-image: url("data:image/svg+xml,%3csv
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(10, 13, 20, 0.92);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
   height: 70px;
@@ -243,15 +243,15 @@ select.input { appearance: none; background-image: url("data:image/svg+xml,%3csv
   font-size: 18px;
   font-weight: 800;
   color: white;
-  background: linear-gradient(135deg, #d4a853 0%, #c49b3f 50%, #8b6914 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
 }
 
 .nav-brand-text {
   font-weight: 800;
   font-size: 20px;
   letter-spacing: -0.03em;
-  font-family: var(--font-mono);
-  text-transform: uppercase;
+  font-family: var(--font-sans);
+  text-transform: none;
 }
 
 .nav-actions {
@@ -567,6 +567,7 @@ select.input { appearance: none; background-image: url("data:image/svg+xml,%3csv
     gap: 6px;
   }
   .mobile-bottom-nav__item {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -582,7 +583,24 @@ select.input { appearance: none; background-image: url("data:image/svg+xml,%3csv
   }
   .mobile-bottom-nav__item.is-active {
     color: var(--text);
-  background: rgba(212, 168, 83, 0.12);
+    background: rgba(212, 168, 83, 0.12);
+  }
+  .mobile-bottom-nav__badge {
+    position: absolute;
+    top: 6px;
+    right: 12px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: #ef4444;
+    color: white;
+    font-size: 10px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
   }
   .mobile-bottom-nav__item svg {
     flex-shrink: 0;
@@ -632,6 +650,7 @@ select.input { appearance: none; background-image: url("data:image/svg+xml,%3csv
     gap: 8px;
   }
   .mobile-bottom-sheet__item {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -651,6 +670,11 @@ select.input { appearance: none; background-image: url("data:image/svg+xml,%3csv
   }
   .mobile-bottom-sheet__item.is-danger {
     color: var(--danger);
+  }
+  .mobile-bottom-nav__badge--sheet {
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
   }
   .section-title { font-size: 24px; line-height: 1.15; }
   .hero-title { font-size: 40px; line-height: 1.12; }

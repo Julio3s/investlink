@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../utils/api';
 import {
   Bell,
   Briefcase,
@@ -33,11 +34,11 @@ const getNavigation = (user) => {
   const primary = [
     { to: '/', label: 'Accueil', icon: Home },
     { to: '/projects', label: 'Explorer', icon: Search },
-    ...(user ? [{ to: '/wallet', label: 'Portefeuille', icon: Wallet }] : []),
     { to: '/messages', label: 'Messages', icon: MessageSquare },
   ];
 
   const secondary = [
+    ...(user ? [{ to: '/wallet', label: 'Portefeuille', icon: Wallet }] : []),
     { to: '/community', label: 'Communaute', icon: Users },
     { to: '/notifications', label: 'Notifications', icon: Bell },
     { to: '/profile', label: 'Profil', icon: User },
@@ -53,11 +54,51 @@ export default function MobileBottomNav() {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const [unreadMessages, setUnreadMessages] = useState(0);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
   const navigation = useMemo(() => getNavigation(user), [user]);
 
   useEffect(() => {
     setOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (!user) {
+      setUnreadMessages(0);
+      setUnreadNotifications(0);
+      return;
+    }
+
+    let alive = true;
+
+    const loadCounts = async () => {
+      try {
+        const [conversationsRes, notificationsRes] = await Promise.all([
+          api.get('/conversations'),
+          api.get('/notifications'),
+        ]);
+
+        if (!alive) return;
+
+        const messageCount = (conversationsRes.data || []).reduce((sum, conv) => sum + (conv.unread_count || 0), 0);
+        const notificationCount = (notificationsRes.data || []).filter((notification) => !notification.is_read).length;
+
+        setUnreadMessages(messageCount);
+        setUnreadNotifications(notificationCount);
+      } catch {
+        if (alive) {
+          setUnreadMessages(0);
+          setUnreadNotifications(0);
+        }
+      }
+    };
+
+    void loadCounts();
+
+    return () => {
+      alive = false;
+    };
+  }, [user, location.pathname]);
 
   const isActive = (to) =>
     location.pathname === to || (to !== '/' && location.pathname.startsWith(to));
@@ -76,6 +117,9 @@ export default function MobileBottomNav() {
             >
               <Icon size={18} />
               <span>{label}</span>
+              {to === '/messages' && unreadMessages > 0 && (
+                <span className="mobile-bottom-nav__badge">{unreadMessages > 9 ? '9+' : unreadMessages}</span>
+              )}
             </Link>
           ))}
 
@@ -101,6 +145,11 @@ export default function MobileBottomNav() {
             >
               <Icon size={18} />
               <span>{label}</span>
+              {to === '/notifications' && unreadNotifications > 0 && (
+                <span className="mobile-bottom-nav__badge mobile-bottom-nav__badge--sheet">
+                  {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                </span>
+              )}
             </Link>
           ))}
 
