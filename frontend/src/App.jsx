@@ -13,6 +13,7 @@ import MyProjects from './pages/MyProjects';
 import Messages from './pages/Messages';
 import Community from './pages/Community';
 import Profile from './pages/Profile';
+import PublicProfile from './pages/PublicProfile';
 import Admin from './pages/Admin';
 import Notifications from './pages/Notifications';
 
@@ -74,6 +75,7 @@ function AppRoutes() {
             <Profile />
           </PrivateRoute>
         } />
+        <Route path="/members/:id" element={<PublicProfile />} />
         <Route path="/notifications" element={
           <PrivateRoute>
             <Notifications />

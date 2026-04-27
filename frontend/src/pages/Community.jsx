@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { MessageSquare, Search, Shield, Users } from 'lucide-react';
 import api from '../utils/api';
@@ -114,7 +114,7 @@ export default function Community() {
 
               return (
                 <div key={member.id} className="card" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <Link to={`/members/${member.id}`} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                     <Avatar
                       src={member.avatar_url}
                       name={`${member.first_name || ''} ${member.last_name || ''}`}
@@ -130,7 +130,7 @@ export default function Community() {
                         {member.country ? ` · ${member.country}` : ''}
                       </div>
                     </div>
-                  </div>
+                  </Link>
 
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                     {member.verification_status === 'verifie' && (
@@ -160,15 +160,19 @@ export default function Community() {
                     {member.bio || 'Ce membre n a pas encore ajoute de presentation.'}
                   </p>
 
-                  <button
-                    type="button"
-                    className="btn btn-primary mobile-full-width"
-                    onClick={() => void startConversation(member)}
-                    disabled={startingId === member.id}
-                    style={{ marginTop: 'auto' }}
-                  >
-                    {startingId === member.id ? <span className="spinner" /> : <><MessageSquare size={16} /> Discuter</>}
-                  </button>
+                  <div className="responsive-row" style={{ marginTop: 'auto' }}>
+                    <Link to={`/members/${member.id}`} className="btn btn-outline mobile-full-width">
+                      Voir le profil
+                    </Link>
+                    <button
+                      type="button"
+                      className="btn btn-primary mobile-full-width"
+                      onClick={() => void startConversation(member)}
+                      disabled={startingId === member.id}
+                    >
+                      {startingId === member.id ? <span className="spinner" /> : <><MessageSquare size={16} /> Discuter</>}
+                    </button>
+                  </div>
                 </div>
               );
             })}

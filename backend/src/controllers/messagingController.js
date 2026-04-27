@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const { uploadBuffer } = require('../utils/cloudinary');
 
 // POST /conversations - create or get existing
 const createConversation = async (req, res) => {
@@ -74,7 +75,15 @@ const getUserConversations = async (req, res) => {
         p.title AS project_title,
         u1.first_name AS user1_first_name, u1.last_name AS user1_last_name, u1.avatar_url AS user1_avatar,
         u2.first_name AS user2_first_name, u2.last_name AS user2_last_name, u2.avatar_url AS user2_avatar,
-        (SELECT content FROM messages WHERE conversation_id = c.id ORDER BY created_at DESC LIMIT 1) AS last_message,
+        (SELECT
+            CASE
+              WHEN file_url IS NOT NULL AND COALESCE(NULLIF(content, ''), '') = '' THEN 'Fichier joint'
+              ELSE content
+            END
+          FROM messages
+          WHERE conversation_id = c.id
+          ORDER BY created_at DESC
+          LIMIT 1) AS last_message,
         (SELECT created_at FROM messages WHERE conversation_id = c.id ORDER BY created_at DESC LIMIT 1) AS last_message_at,
         (SELECT COUNT(*) FROM messages WHERE conversation_id = c.id AND sender_id != $1 AND is_read = FALSE) AS unread_count
        FROM conversations c
@@ -122,9 +131,17 @@ const getMessages = async (req, res) => {
 // POST /messages
 const sendMessage = async (req, res) => {
   try {
-    const { conversation_id, content } = req.body;
-    const file_url = req.file ? `/${req.file.path.replace(/\\/g, '/')}` : null;
+    const { conversation_id, content = '' } = req.body;
+    const normalizedContent = String(content).trim();
+    const file_url = req.file
+      ? await uploadBuffer(req.file, { folder: 'investlink/messages', resourceType: 'auto' })
+      : null;
     const type = file_url ? 'fichier' : 'texte';
+    const messageContent = normalizedContent;
+
+    if (!messageContent && !file_url) {
+      return res.status(400).json({ message: 'Message vide' });
+    }
 
     const conv = await pool.query(
       "SELECT * FROM conversations WHERE id = $1 AND (user_1_id = $2 OR user_2_id = $2) AND status = 'actif'",
@@ -134,7 +151,15 @@ const sendMessage = async (req, res) => {
 
     const result = await pool.query(
       'INSERT INTO messages (conversation_id, sender_id, content, type, file_url) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [conversation_id, req.user.id, content || '', type, file_url]
+      [conversation_id, req.user.id, messageContent, type, file_url]
+    );
+
+    const message = await pool.query(
+      `SELECT m.*, u.first_name, u.last_name, u.avatar_url
+       FROM messages m
+       JOIN users u ON u.id = m.sender_id
+       WHERE m.id = $1`,
+      [result.rows[0].id]
     );
 
     const otherId = conv.rows[0].user_1_id === req.user.id ? conv.rows[0].user_2_id : conv.rows[0].user_1_id;
@@ -146,8 +171,11 @@ const sendMessage = async (req, res) => {
 
     await pool.query('UPDATE conversations SET updated_at = NOW() WHERE id = $1', [conversation_id]);
 
-    res.status(201).json(result.rows[0]);
+    res.status(201).json(message.rows[0]);
   } catch (err) {
+    if (err.message === 'Cloudinary is not configured') {
+      return res.status(503).json({ message: 'Le stockage Cloudinary n est pas configure sur ce deploiement' });
+    }
     console.error(err);
     res.status(500).json({ message: 'Erreur serveur' });
   }

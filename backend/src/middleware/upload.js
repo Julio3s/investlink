@@ -10,6 +10,7 @@ const fileFilter = (req, file, cb) => {
     selfie: ['.jpg', '.jpeg', '.png'],
     project_image: ['.jpg', '.jpeg', '.png', '.webp'],
     avatar: ['.jpg', '.jpeg', '.png', '.webp'],
+    file: ['.pdf', '.jpg', '.jpeg', '.png', '.webp', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt'],
   };
 
   const ext = path.extname(file.originalname).toLowerCase();

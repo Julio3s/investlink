@@ -143,6 +143,42 @@ const getMembers = async (req, res) => {
   }
 };
 
+// GET /auth/members/:id
+const getMemberProfile = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const member = await pool.query(
+      `SELECT id, role, first_name, last_name, country, bio, avatar_url,
+              verification_status, trust_score, created_at
+       FROM users
+       WHERE id = $1 AND is_active = TRUE AND is_suspended = FALSE`,
+      [id]
+    );
+
+    if (!member.rows[0]) {
+      return res.status(404).json({ message: 'Membre introuvable' });
+    }
+
+    const projects = await pool.query(
+      `SELECT id, title, sector, country, amount_sought, image_url, status, created_at
+       FROM projects
+       WHERE owner_id = $1 AND status != 'brouillon'
+       ORDER BY created_at DESC`,
+      [id]
+    );
+
+    res.json({
+      ...member.rows[0],
+      project_count: projects.rows.length,
+      projects: projects.rows,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
+
 // PUT /auth/profile
 const updateProfile = async (req, res) => {
   try {
@@ -177,4 +213,4 @@ const updateProfile = async (req, res) => {
   }
 };
 
-module.exports = { register, login, getMe, getMembers, updateProfile };
+module.exports = { register, login, getMe, getMembers, getMemberProfile, updateProfile };

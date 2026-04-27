@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { io } from 'socket.io-client';
-import { ArrowLeft, Bot, MessageSquare, Send, X } from 'lucide-react';
+import { ArrowLeft, Bot, FileText, MessageSquare, Paperclip, Send, UserRound, X } from 'lucide-react';
 import api from '../utils/api';
 import { getFileUrl } from '../utils/fileUrl';
 import { useAuth } from '../context/AuthContext';
@@ -22,9 +22,16 @@ export default function Messages() {
   const [messages, setMessages] = useState([]);
   const [activeConv, setActiveConv] = useState(null);
   const [input, setInput] = useState('');
+  const [attachment, setAttachment] = useState(null);
   const [sending, setSending] = useState(false);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 600);
+  const [composerFocused, setComposerFocused] = useState(false);
+  const [aiComposerFocused, setAiComposerFocused] = useState(false);
+  const [keyboardOffset, setKeyboardOffset] = useState(0);
   const bottomRef = useRef(null);
+  const composerRef = useRef(null);
+  const inputRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const [showAI, setShowAI] = useState(false);
   const [aiMessages, setAiMessages] = useState([
@@ -44,11 +51,39 @@ export default function Messages() {
   }, []);
 
   useEffect(() => {
+    const viewport = window.visualViewport;
+    if (!viewport) return undefined;
+
+    const updateViewport = () => {
+      const offset = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
+      setKeyboardOffset(offset);
+    };
+
+    updateViewport();
+    viewport.addEventListener('resize', updateViewport);
+    viewport.addEventListener('scroll', updateViewport);
+
+    return () => {
+      viewport.removeEventListener('resize', updateViewport);
+      viewport.removeEventListener('scroll', updateViewport);
+    };
+  }, []);
+
+  useEffect(() => {
+    const shouldHideMobileNav = isMobile && (composerFocused || aiComposerFocused);
+    document.body.classList.toggle('mobile-keyboard-open', shouldHideMobileNav);
+
+    return () => {
+      document.body.classList.remove('mobile-keyboard-open');
+    };
+  }, [aiComposerFocused, composerFocused, isMobile]);
+
+  useEffect(() => {
     loadConversations();
     socket = io('/', { auth: { token: localStorage.getItem('token') } });
     socket.emit('join', user.id);
     socket.on('new_message', (msg) => {
-      setMessages((prev) => [...prev, msg]);
+      setMessages((prev) => (prev.some((existing) => existing.id === msg.id) ? prev : [...prev, msg]));
     });
 
     return () => {
@@ -65,7 +100,7 @@ export default function Messages() {
 
     const conversation = conversations.find((conv) => conv.id === conversationId);
     if (conversation) {
-      void selectConv(conversation);
+      void selectConv(conversation, { skipNavigation: true });
     }
   }, [conversationId, conversations]);
 
@@ -77,6 +112,25 @@ export default function Messages() {
     aiBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [aiMessages]);
 
+  useEffect(() => {
+    const inputElement = inputRef.current;
+    if (!inputElement) return;
+
+    inputElement.style.height = '0px';
+    inputElement.style.height = `${Math.min(inputElement.scrollHeight, 160)}px`;
+  }, [input]);
+
+  useEffect(() => {
+    if (!isMobile || (!composerFocused && !aiComposerFocused)) return undefined;
+
+    const timeout = window.setTimeout(() => {
+      composerRef.current?.scrollIntoView({ block: 'end', behavior: 'smooth' });
+      bottomRef.current?.scrollIntoView({ block: 'end', behavior: 'smooth' });
+    }, 120);
+
+    return () => window.clearTimeout(timeout);
+  }, [aiComposerFocused, composerFocused, isMobile, keyboardOffset, showAI]);
+
   const loadConversations = async () => {
     try {
       const res = await api.get('/conversations');
@@ -86,9 +140,11 @@ export default function Messages() {
     }
   };
 
-  const selectConv = async (conv) => {
+  const selectConv = async (conv, options = {}) => {
     setActiveConv(conv);
-    navigate(`/messages/${conv.id}`, { replace: true });
+    if (!options.skipNavigation) {
+      navigate(`/messages/${conv.id}`, { replace: true });
+    }
     socket?.emit('join_conversation', conv.id);
 
     try {
@@ -106,37 +162,42 @@ export default function Messages() {
     navigate('/messages', { replace: true });
   };
 
-  const sendMsg = async (e) => {
-    e.preventDefault();
-    if (!input.trim() || !activeConv) return;
+  const handleAttachmentChange = (event) => {
+    const selectedFile = event.target.files?.[0];
+    if (!selectedFile) return;
+
+    setAttachment(selectedFile);
+    event.target.value = '';
+  };
+
+  const sendMsg = async (event) => {
+    event?.preventDefault();
+    if ((!input.trim() && !attachment) || !activeConv) return;
 
     setSending(true);
     try {
-      const res = await api.post('/messages', {
-        conversation_id: activeConv.id,
-        content: input,
+      const formData = new FormData();
+      formData.append('conversation_id', activeConv.id);
+      if (input.trim()) formData.append('content', input.trim());
+      if (attachment) formData.append('file', attachment);
+
+      const res = await api.post('/messages', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          ...res.data,
-          first_name: user.first_name,
-          last_name: user.last_name,
-          avatar_url: user.avatar_url,
-        },
-      ]);
+      setMessages((prev) => [...prev, res.data]);
       socket?.emit('send_message', { conversation_id: activeConv.id, message: res.data });
       setInput('');
+      setAttachment(null);
       void loadConversations();
-    } catch {
-      toast.error('Erreur');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Erreur');
     }
     setSending(false);
   };
 
-  const sendAI = async (e) => {
-    e.preventDefault();
+  const sendAI = async (event) => {
+    event.preventDefault();
     if (!aiInput.trim()) return;
 
     const userMsg = { role: 'user', content: aiInput };
@@ -159,22 +220,30 @@ export default function Messages() {
   const getOtherUser = (conv) => {
     if (conv.user_1_id === user.id) {
       return {
+        id: conv.user_2_id,
         name: `${conv.user2_first_name} ${conv.user2_last_name}`,
         avatar: conv.user2_avatar,
       };
     }
 
     return {
+      id: conv.user_1_id,
       name: `${conv.user1_first_name} ${conv.user1_last_name}`,
       avatar: conv.user1_avatar,
     };
   };
 
+  const openMemberProfile = (memberId) => {
+    navigate(`/members/${memberId}`);
+  };
+
+  const activeConversationUser = activeConv ? getOtherUser(activeConv) : null;
   const mobileConversationOpen = isMobile && Boolean(activeConv);
+  const aiShellBottom = isMobile ? Math.max(12, keyboardOffset + 12) : 24;
 
   return (
-    <div className="page" style={{ padding: '24px 0' }}>
-      <div className="container" style={{ minHeight: 'calc(100dvh - 120px)' }}>
+    <div className={`page ${isMobile && (composerFocused || aiComposerFocused) ? 'page-keyboard-active' : ''}`} style={{ padding: '24px 0' }}>
+      <div className="container" style={{ minHeight: isMobile ? 'calc(100dvh - 148px)' : 'calc(100dvh - 120px)' }}>
         <div className="messages-layout">
           <div className="card messages-panel" style={{ display: mobileConversationOpen ? 'none' : undefined }}>
             <div className="messages-panel-header" style={{ borderBottom: '1px solid var(--border)', fontWeight: 700 }}>
@@ -244,7 +313,7 @@ export default function Messages() {
           </div>
 
           <div className="card messages-chat" style={{ display: isMobile && !activeConv ? 'none' : undefined }}>
-            {activeConv ? (
+            {activeConv && activeConversationUser ? (
               <>
                 <div className="messages-chat-header" style={{ borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 12 }}>
                   {isMobile && (
@@ -252,31 +321,49 @@ export default function Messages() {
                       <ArrowLeft size={16} />
                     </button>
                   )}
-                  <Avatar
-                    src={getOtherUser(activeConv).avatar}
-                    name={getOtherUser(activeConv).name}
-                    size={36}
-                    textStyle={{ fontSize: 14 }}
-                  />
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontWeight: 700 }}>{getOtherUser(activeConv).name}</div>
-                    {activeConv.project_title && (
-                      <div style={{ fontSize: 12, color: 'var(--text-3)' }}>
-                        Projet: {activeConv.project_title}
-                      </div>
-                    )}
-                  </div>
+
+                  <button
+                    type="button"
+                    className="messages-contact-btn"
+                    onClick={() => openMemberProfile(activeConversationUser.id)}
+                  >
+                    <Avatar
+                      src={activeConversationUser.avatar}
+                      name={activeConversationUser.name}
+                      size={36}
+                      textStyle={{ fontSize: 14 }}
+                    />
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontWeight: 700 }}>{activeConversationUser.name}</div>
+                      {activeConv.project_title && (
+                        <div style={{ fontSize: 12, color: 'var(--text-3)' }}>
+                          Projet: {activeConv.project_title}
+                        </div>
+                      )}
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => openMemberProfile(activeConversationUser.id)}
+                    style={{ marginLeft: 'auto', paddingInline: 12 }}
+                  >
+                    <UserRound size={15} />
+                    <span className="mobile-hide">Profil</span>
+                  </button>
                 </div>
 
                 <div className="messages-chat-body">
-                  {messages.map((msg, i) => {
+                  {messages.map((msg, index) => {
                     const isMine = msg.sender_id === user.id;
                     const hasImage = msg.file_url && isImageFile(msg.file_url);
                     const hasFile = msg.file_url && !hasImage;
+                    const attachmentUrl = msg.file_url ? getFileUrl(msg.file_url) : '';
 
                     return (
                       <div
-                        key={msg.id || i}
+                        key={msg.id || index}
                         style={{
                           display: 'flex',
                           justifyContent: isMine ? 'flex-end' : 'flex-start',
@@ -285,15 +372,21 @@ export default function Messages() {
                         }}
                       >
                         {!isMine && (
-                          <Avatar
-                            src={msg.avatar_url}
-                            name={`${msg.first_name || ''} ${msg.last_name || ''}`}
-                            size={30}
-                            textStyle={{ fontSize: 12 }}
-                          />
+                          <button
+                            type="button"
+                            onClick={() => openMemberProfile(msg.sender_id)}
+                            style={{ background: 'none', border: 'none', padding: 0 }}
+                          >
+                            <Avatar
+                              src={msg.avatar_url}
+                              name={`${msg.first_name || ''} ${msg.last_name || ''}`}
+                              size={30}
+                              textStyle={{ fontSize: 12 }}
+                            />
+                          </button>
                         )}
 
-                        <div style={{ maxWidth: isMobile ? '82%' : '68%' }}>
+                        <div style={{ maxWidth: isMobile ? '88%' : '68%' }}>
                           <div
                             style={{
                               padding: '10px 16px',
@@ -308,13 +401,13 @@ export default function Messages() {
                             }}
                           >
                             {hasImage && (
-                              <a href={getFileUrl(msg.file_url)} target="_blank" rel="noreferrer">
+                              <a href={attachmentUrl} target="_blank" rel="noreferrer">
                                 <img
-                                  src={getFileUrl(msg.file_url)}
+                                  src={attachmentUrl}
                                   alt="Image envoyee"
                                   style={{
                                     width: '100%',
-                                    maxWidth: 260,
+                                    maxWidth: 280,
                                     borderRadius: 12,
                                     display: 'block',
                                     objectFit: 'cover',
@@ -325,16 +418,19 @@ export default function Messages() {
 
                             {hasFile && (
                               <a
-                                href={getFileUrl(msg.file_url)}
+                                href={attachmentUrl}
                                 target="_blank"
                                 rel="noreferrer"
+                                className="messages-file-card"
                                 style={{
-                                  color: isMine ? 'white' : 'var(--primary)',
-                                  textDecoration: 'underline',
-                                  wordBreak: 'break-word',
+                                  color: isMine ? 'white' : 'var(--text)',
+                                  background: isMine ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.04)',
                                 }}
                               >
-                                Voir le fichier joint
+                                <FileText size={18} />
+                                <span style={{ fontSize: 13, fontWeight: 600 }}>
+                                  Ouvrir le fichier joint
+                                </span>
                               </a>
                             )}
 
@@ -353,17 +449,67 @@ export default function Messages() {
                   <div ref={bottomRef} />
                 </div>
 
-                <form onSubmit={sendMsg} className="messages-chat-footer" style={{ borderTop: '1px solid var(--border)', display: 'flex', gap: 12 }}>
-                  <input
-                    className="input"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="Ecrire un message..."
-                    onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMsg(e)}
-                  />
-                  <button type="submit" className="btn btn-primary" disabled={sending || !input.trim()}>
-                    {sending ? <span className="spinner" /> : <Send size={16} />}
-                  </button>
+                <form onSubmit={sendMsg} className="messages-chat-footer" style={{ borderTop: '1px solid var(--border)' }}>
+                  {attachment && (
+                    <div className="messages-attachment-pill">
+                      <FileText size={16} style={{ color: 'var(--primary)' }} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 600, fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {attachment.name}
+                        </div>
+                        <div style={{ color: 'var(--text-3)', fontSize: 12 }}>
+                          {(attachment.size / 1024 / 1024).toFixed(2)} Mo
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => setAttachment(null)}
+                        style={{ paddingInline: 10 }}
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  )}
+
+                  <div ref={composerRef} className="messages-chat-footer__main">
+                    <button
+                      type="button"
+                      className="btn btn-outline messages-attach-btn"
+                      onClick={() => fileInputRef.current?.click()}
+                      aria-label="Joindre un fichier"
+                    >
+                      <Paperclip size={16} />
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+                      onChange={handleAttachmentChange}
+                      style={{ display: 'none' }}
+                    />
+
+                    <textarea
+                      ref={inputRef}
+                      className="input messages-composer"
+                      value={input}
+                      onChange={(event) => setInput(event.target.value)}
+                      placeholder="Ecrire un message..."
+                      rows={1}
+                      onFocus={() => setComposerFocused(true)}
+                      onBlur={() => setComposerFocused(false)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' && !event.shiftKey) {
+                          event.preventDefault();
+                          void sendMsg();
+                        }
+                      }}
+                    />
+
+                    <button type="submit" className="btn btn-primary messages-attach-btn" disabled={sending || (!input.trim() && !attachment)}>
+                      {sending ? <span className="spinner" /> : <Send size={16} />}
+                    </button>
+                  </div>
                 </form>
               </>
             ) : (
@@ -376,7 +522,7 @@ export default function Messages() {
         </div>
       </div>
 
-      <div className="messages-ai-shell">
+      <div className="messages-ai-shell" style={{ bottom: aiShellBottom, right: isMobile ? 12 : 24, left: isMobile ? 12 : 'auto' }}>
         {showAI ? (
           <div className="messages-ai-panel">
             <div className="messages-ai-header" style={{ background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -391,35 +537,35 @@ export default function Messages() {
             </div>
 
             <div className="messages-ai-body" style={{ flex: 1, padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {aiMessages.map((m, i) => (
-                <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
+              {aiMessages.map((message, index) => (
+                <div key={index} style={{ display: 'flex', justifyContent: message.role === 'user' ? 'flex-end' : 'flex-start' }}>
                   <div
                     style={{
                       maxWidth: '85%',
                       padding: '10px 14px',
-                      borderRadius: m.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                      background: m.role === 'user' ? 'var(--primary)' : 'var(--bg-3)',
-                      color: m.role === 'user' ? 'white' : 'var(--text)',
+                      borderRadius: message.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                      background: message.role === 'user' ? 'var(--primary)' : 'var(--bg-3)',
+                      color: message.role === 'user' ? 'white' : 'var(--text)',
                       fontSize: 13,
                       lineHeight: 1.5,
                     }}
                   >
-                    {m.content}
+                    {message.content}
                   </div>
                 </div>
               ))}
 
               {aiLoading && (
                 <div style={{ display: 'flex', gap: 4, padding: '10px 14px', background: 'var(--bg-3)', borderRadius: 16, width: 'fit-content' }}>
-                  {[0, 1, 2].map((i) => (
+                  {[0, 1, 2].map((index) => (
                     <div
-                      key={i}
+                      key={index}
                       style={{
                         width: 6,
                         height: 6,
                         background: 'var(--text-3)',
                         borderRadius: '50%',
-                        animation: `pulse 1s ${i * 0.3}s ease infinite`,
+                        animation: `pulse 1s ${index * 0.3}s ease infinite`,
                       }}
                     />
                   ))}
@@ -433,9 +579,11 @@ export default function Messages() {
               <input
                 className="input"
                 value={aiInput}
-                onChange={(e) => setAiInput(e.target.value)}
+                onChange={(event) => setAiInput(event.target.value)}
                 placeholder="Posez votre question..."
-                style={{ fontSize: 13 }}
+                style={{ fontSize: isMobile ? 16 : 13 }}
+                onFocus={() => setAiComposerFocused(true)}
+                onBlur={() => setAiComposerFocused(false)}
               />
               <button type="submit" className="btn btn-primary btn-sm" disabled={aiLoading || !aiInput.trim()}>
                 <Send size={14} />

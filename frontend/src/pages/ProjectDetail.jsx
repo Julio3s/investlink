@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ChevronDown, ChevronUp, Download, Expand, Eye, FileText, Flag, MapPin, MessageSquare, Shield, X } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -293,7 +293,7 @@ export default function ProjectDetail() {
               <h4 style={{ fontWeight: 700, marginBottom: 16, fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-3)' }}>
                 Porteur
               </h4>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+              <Link to={`/members/${project.owner_id}`} style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
                 <Avatar
                   src={project.avatar_url}
                   name={`${project.first_name || ''} ${project.last_name || ''}`}
@@ -310,7 +310,7 @@ export default function ProjectDetail() {
                     </div>
                   )}
                 </div>
-              </div>
+              </Link>
               {project.bio && <p style={{ color: 'var(--text-2)', fontSize: 13, lineHeight: 1.6 }}>{project.bio}</p>}
               <div style={{ marginTop: 16, padding: 12, background: 'var(--bg-3)', borderRadius: 10 }}>
                 <div style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 4 }}>Score de confiance</div>
