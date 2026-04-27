@@ -11,7 +11,10 @@ router.post('/', authenticate, requireRole('porteur'), upload.fields([
   { name: 'pitch_deck', maxCount: 1 },
   { name: 'project_image', maxCount: 1 },
 ]), ctrl.createProject);
-router.put('/:id', authenticate, requireRole('porteur', 'admin'), ctrl.updateProject);
+router.put('/:id', authenticate, requireRole('porteur', 'admin'), upload.fields([
+  { name: 'pitch_deck', maxCount: 1 },
+  { name: 'project_image', maxCount: 1 },
+]), ctrl.updateProject);
 router.delete('/:id', authenticate, ctrl.deleteProject);
 router.post('/:id/favorite', authenticate, requireRole('investisseur'), ctrl.toggleFavorite);
 router.post('/:id/update', authenticate, requireRole('porteur'), ctrl.addProjectUpdate);

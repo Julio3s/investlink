@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const { uploadBuffer } = require('../utils/cloudinary');
 
 // GET /projects
 const getProjects = async (req, res) => {
@@ -50,6 +51,9 @@ const getProjects = async (req, res) => {
       pages: Math.ceil(count.rows[0].count / limit),
     });
   } catch (err) {
+    if (err.message === 'Cloudinary is not configured') {
+      return res.status(503).json({ message: 'Le stockage Cloudinary n est pas configure sur ce deploiement' });
+    }
     console.error(err);
     res.status(500).json({ message: 'Erreur serveur' });
   }
@@ -75,6 +79,9 @@ const getProject = async (req, res) => {
 
     res.json({ ...result.rows[0], updates: updates.rows });
   } catch (err) {
+    if (err.message === 'Cloudinary is not configured') {
+      return res.status(503).json({ message: 'Le stockage Cloudinary n est pas configure sur ce deploiement' });
+    }
     res.status(500).json({ message: 'Erreur serveur' });
   }
 };
@@ -87,10 +94,17 @@ const createProject = async (req, res) => {
       business_model, amount_sought, sector, country,
     } = req.body;
 
-    const pitch_deck_url = req.files?.pitch_deck?.[0]
-      ? `/${req.files.pitch_deck[0].path.replace(/\\/g, '/')}` : null;
-    const image_url = req.files?.project_image?.[0]
-      ? `/${req.files.project_image[0].path.replace(/\\/g, '/')}` : null;
+    const pitchDeckFile = req.files?.pitch_deck?.[0];
+    const projectImageFile = req.files?.project_image?.[0];
+
+    const [pitch_deck_url, image_url] = await Promise.all([
+      pitchDeckFile
+        ? uploadBuffer(pitchDeckFile, { folder: 'investlink/pitchdecks', resourceType: 'raw' })
+        : null,
+      projectImageFile
+        ? uploadBuffer(projectImageFile, { folder: 'investlink/projects', resourceType: 'image' })
+        : null,
+    ]);
 
     const result = await pool.query(
       `INSERT INTO projects (owner_id, title, problem_description, solution, target_market,
@@ -120,13 +134,25 @@ const updateProject = async (req, res) => {
     const { title, problem_description, solution, target_market,
       business_model, amount_sought, sector, country, status } = req.body;
 
+    const pitchDeckFile = req.files?.pitch_deck?.[0];
+    const projectImageFile = req.files?.project_image?.[0];
+    const [pitch_deck_url, image_url] = await Promise.all([
+      pitchDeckFile
+        ? uploadBuffer(pitchDeckFile, { folder: 'investlink/pitchdecks', resourceType: 'raw' })
+        : null,
+      projectImageFile
+        ? uploadBuffer(projectImageFile, { folder: 'investlink/projects', resourceType: 'image' })
+        : null,
+    ]);
+
     const result = await pool.query(
       `UPDATE projects SET title=COALESCE($1,title), problem_description=COALESCE($2,problem_description),
        solution=COALESCE($3,solution), target_market=COALESCE($4,target_market),
        business_model=COALESCE($5,business_model), amount_sought=COALESCE($6,amount_sought),
-       sector=COALESCE($7,sector), country=COALESCE($8,country), status=COALESCE($9,status)
-       WHERE id=$10 RETURNING *`,
-      [title, problem_description, solution, target_market, business_model, amount_sought, sector, country, status, id]
+       sector=COALESCE($7,sector), country=COALESCE($8,country), status=COALESCE($9,status),
+       pitch_deck_url=COALESCE($10,pitch_deck_url), image_url=COALESCE($11,image_url)
+       WHERE id=$12 RETURNING *`,
+      [title, problem_description, solution, target_market, business_model, amount_sought, sector, country, status, pitch_deck_url, image_url, id]
     );
 
     res.json(result.rows[0]);

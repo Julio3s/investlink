@@ -1,12 +1,20 @@
 const pool = require('../config/db');
+const { uploadBuffer } = require('../utils/cloudinary');
 
 // POST /kyc/submit
 const submitKYC = async (req, res) => {
   try {
-    const id_document_url = req.files?.id_document?.[0]
-      ? `/${req.files.id_document[0].path.replace(/\\/g, '/')}` : null;
-    const selfie_url = req.files?.selfie?.[0]
-      ? `/${req.files.selfie[0].path.replace(/\\/g, '/')}` : null;
+    const idDocumentFile = req.files?.id_document?.[0];
+    const selfieFile = req.files?.selfie?.[0];
+
+    const [id_document_url, selfie_url] = await Promise.all([
+      idDocumentFile
+        ? uploadBuffer(idDocumentFile, { folder: 'investlink/kyc', resourceType: 'auto' })
+        : null,
+      selfieFile
+        ? uploadBuffer(selfieFile, { folder: 'investlink/kyc', resourceType: 'image' })
+        : null,
+    ]);
 
     if (!id_document_url || !selfie_url) {
       return res.status(400).json({ message: 'Pièce d\'identité et selfie requis' });
@@ -30,6 +38,9 @@ const submitKYC = async (req, res) => {
 
     res.json({ message: 'Vérification soumise, en attente de validation' });
   } catch (err) {
+    if (err.message === 'Cloudinary is not configured') {
+      return res.status(503).json({ message: 'Le stockage Cloudinary n est pas configure sur ce deploiement' });
+    }
     console.error(err);
     res.status(500).json({ message: 'Erreur serveur' });
   }

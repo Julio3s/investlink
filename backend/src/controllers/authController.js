@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const pool = require('../config/db');
+const { uploadBuffer } = require('../utils/cloudinary');
 
 const generateToken = (user) =>
   jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
@@ -40,6 +41,9 @@ const register = async (req, res) => {
       user: { id: user.id, email: user.email, role: user.role, first_name: user.first_name, last_name: user.last_name },
     });
   } catch (err) {
+    if (err.message === 'Cloudinary is not configured') {
+      return res.status(503).json({ message: 'Le stockage Cloudinary n est pas configure sur ce deploiement' });
+    }
     console.error(err);
     res.status(500).json({ message: 'Erreur serveur' });
   }
@@ -143,7 +147,9 @@ const getMembers = async (req, res) => {
 const updateProfile = async (req, res) => {
   try {
     const { first_name, last_name, phone, country, bio } = req.body;
-    const avatar_url = req.file ? `/${req.file.path.replace(/\\/g, '/')}` : undefined;
+    const avatar_url = req.file
+      ? await uploadBuffer(req.file, { folder: 'investlink/avatars', resourceType: 'image' })
+      : undefined;
 
     const fields = [];
     const values = [];

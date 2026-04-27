@@ -430,6 +430,11 @@ select.input { appearance: none; background-image: url("data:image/svg+xml,%3csv
   display: none;
 }
 
+.mobile-bottom-sheet,
+.mobile-bottom-sheet__backdrop {
+  display: none;
+}
+
 .text-muted { color: var(--text-2); }
 .text-sm { font-size: 13px; }
 .text-xs { font-size: 12px; }
@@ -478,7 +483,7 @@ select.input { appearance: none; background-image: url("data:image/svg+xml,%3csv
   }
   .mobile-bottom-nav__inner {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 6px;
   }
   .mobile-bottom-nav__item {
@@ -505,6 +510,67 @@ select.input { appearance: none; background-image: url("data:image/svg+xml,%3csv
   .mobile-nav-spacer {
     display: block;
     height: 76px;
+  }
+  .mobile-bottom-sheet__backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.42);
+    border: none;
+    z-index: 1290;
+  }
+  .mobile-bottom-sheet {
+    display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1295;
+    padding: 0 12px calc(84px + env(safe-area-inset-bottom));
+    transform: translateY(calc(100% + 24px));
+    transition: transform 0.25s ease;
+    pointer-events: none;
+  }
+  .mobile-bottom-sheet.is-open {
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .mobile-bottom-sheet__handle {
+    width: 44px;
+    height: 5px;
+    border-radius: 999px;
+    background: var(--border-light);
+    margin: 0 auto 10px;
+  }
+  .mobile-bottom-sheet__content {
+    background: rgba(16, 20, 31, 0.98);
+    border: 1px solid var(--border-light);
+    border-radius: 20px;
+    box-shadow: 0 18px 48px rgba(0,0,0,0.35);
+    padding: 10px;
+    display: grid;
+    gap: 8px;
+  }
+  .mobile-bottom-sheet__item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 48px;
+    padding: 0 14px;
+    border-radius: 14px;
+    color: var(--text-2);
+    background: transparent;
+    border: none;
+    text-align: left;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .mobile-bottom-sheet__item.is-active {
+    background: rgba(59, 130, 246, 0.12);
+    color: var(--text);
+  }
+  .mobile-bottom-sheet__item.is-danger {
+    color: var(--danger);
   }
   .section-title { font-size: 24px; line-height: 1.15; }
   .hero-title { font-size: 40px; line-height: 1.12; }
