@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronDown, ChevronUp, Eye, FileText, Flag, MapPin, MessageSquare, Shield } from 'lucide-react';
+import { ChevronDown, ChevronUp, Download, Expand, Eye, FileText, Flag, MapPin, MessageSquare, Shield, X } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import toast from 'react-hot-toast';
@@ -18,6 +18,7 @@ export default function ProjectDetail() {
   const [loading, setLoading] = useState(true);
   const [contacting, setContacting] = useState(false);
   const [showUpdates, setShowUpdates] = useState(false);
+  const [showImagePreview, setShowImagePreview] = useState(false);
 
   useEffect(() => {
     api
@@ -81,6 +82,7 @@ export default function ProjectDetail() {
 
   const trustColor = project.trust_score > 66 ? 'var(--success)' : project.trust_score > 33 ? 'var(--gold)' : 'var(--danger)';
   const trustLabel = project.trust_score > 66 ? 'Eleve' : project.trust_score > 33 ? 'Moyen' : 'Faible';
+  const projectImageUrl = getFileUrl(project.image_url);
 
   return (
     <div className="page">
@@ -88,26 +90,113 @@ export default function ProjectDetail() {
         <div className="responsive-two-col" style={{ gridTemplateColumns: '1fr 320px', alignItems: 'start' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             <div className="card animate-in" style={{ padding: 0, overflow: 'hidden' }}>
-              <CoverImage
-                src={project.image_url}
-                alt={project.title}
-                style={{ width: '100%', height: 240 }}
-                imgStyle={{ width: '100%', height: 240, objectFit: 'cover' }}
-                fallback={
-                  <div
+              {project.image_url ? (
+                <div style={{ position: 'relative' }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowImagePreview(true)}
                     style={{
-                      height: 180,
-                      background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.1))',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 48,
+                      width: '100%',
+                      padding: 0,
+                      border: 'none',
+                      background: 'none',
+                      display: 'block',
+                      cursor: 'zoom-in',
                     }}
                   >
-                    Projet
+                    <CoverImage
+                      src={project.image_url}
+                      alt={project.title}
+                      style={{ width: '100%', height: 240 }}
+                      imgStyle={{ width: '100%', height: 240, objectFit: 'cover' }}
+                      fallback={
+                        <div
+                          style={{
+                            height: 180,
+                            background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.1))',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: 48,
+                          }}
+                        >
+                          Projet
+                        </div>
+                      }
+                    />
+                  </button>
+
+                  <div
+                    style={{
+                      position: 'absolute',
+                      right: 16,
+                      bottom: 16,
+                      display: 'flex',
+                      gap: 8,
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <button
+                      type="button"
+                      className="btn btn-sm"
+                      onClick={() => setShowImagePreview(true)}
+                      style={{
+                        background: 'rgba(10, 13, 20, 0.78)',
+                        color: 'white',
+                        backdropFilter: 'blur(14px)',
+                      }}
+                    >
+                      <Expand size={14} /> Agrandir
+                    </button>
+                    <a
+                      href={projectImageUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="btn btn-sm"
+                      style={{
+                        background: 'rgba(10, 13, 20, 0.78)',
+                        color: 'white',
+                        backdropFilter: 'blur(14px)',
+                      }}
+                    >
+                      <Eye size={14} /> Ouvrir
+                    </a>
+                    <a
+                      href={projectImageUrl}
+                      download
+                      className="btn btn-sm"
+                      style={{
+                        background: 'rgba(10, 13, 20, 0.78)',
+                        color: 'white',
+                        backdropFilter: 'blur(14px)',
+                      }}
+                    >
+                      <Download size={14} /> Telecharger
+                    </a>
                   </div>
-                }
-              />
+                </div>
+              ) : (
+                <CoverImage
+                  src={project.image_url}
+                  alt={project.title}
+                  style={{ width: '100%', height: 240 }}
+                  imgStyle={{ width: '100%', height: 240, objectFit: 'cover' }}
+                  fallback={
+                    <div
+                      style={{
+                        height: 180,
+                        background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.1))',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 48,
+                      }}
+                    >
+                      Projet
+                    </div>
+                  }
+                />
+              )}
 
               <div style={{ padding: 28 }}>
                 <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
@@ -242,6 +331,83 @@ export default function ProjectDetail() {
           </div>
         </div>
       </div>
+
+      {showImagePreview && project.image_url && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Image du projet ${project.title}`}
+          onClick={() => setShowImagePreview(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 1600,
+            background: 'rgba(4, 7, 13, 0.88)',
+            backdropFilter: 'blur(10px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 24,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: 'min(1100px, 100%)',
+              maxHeight: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 16,
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: 12,
+                flexWrap: 'wrap',
+              }}
+            >
+              <div style={{ fontWeight: 700, fontSize: 16 }}>{project.title}</div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <a href={projectImageUrl} target="_blank" rel="noreferrer" className="btn btn-outline btn-sm">
+                  <Eye size={14} /> Ouvrir
+                </a>
+                <a href={projectImageUrl} download className="btn btn-outline btn-sm">
+                  <Download size={14} /> Telecharger
+                </a>
+                <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowImagePreview(false)}>
+                  <X size={14} /> Fermer
+                </button>
+              </div>
+            </div>
+
+            <div
+              style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: 20,
+                padding: 12,
+                overflow: 'hidden',
+              }}
+            >
+              <img
+                src={projectImageUrl}
+                alt={project.title}
+                style={{
+                  width: '100%',
+                  maxHeight: '78vh',
+                  objectFit: 'contain',
+                  display: 'block',
+                  borderRadius: 14,
+                  background: 'rgba(0,0,0,0.18)',
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
