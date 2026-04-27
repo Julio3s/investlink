@@ -1,7 +1,7 @@
-import { Flag, Shield, UserCircle2, FolderOpen, Link as LinkIcon, X } from 'lucide-react';
+import { Flag, Shield, Trash2, UserCircle2, FolderOpen, Link as LinkIcon, X } from 'lucide-react';
 import Avatar from '../common/Avatar';
 
-export default function ContactDetail({ contact, onOpenProfile, onBlock, onReport, sharedFiles = [], sharedProjects = [], mobile = false, onClose }) {
+export default function ContactDetail({ contact, onOpenProfile, onBlock, onReport, onDeleteConversation, sharedFiles = [], sharedProjects = [], mobile = false, onClose }) {
   return (
     <aside style={{ background: 'var(--bg-3)', borderLeft: mobile ? 'none' : '1px solid var(--border)', display: 'flex', flexDirection: 'column', minHeight: 0, height: '100%' }}>
       <div style={{ padding: 20, borderBottom: '1px solid var(--border)' }}>
@@ -76,11 +76,16 @@ export default function ContactDetail({ contact, onOpenProfile, onBlock, onRepor
         </section>
       </div>
 
-      <div style={{ padding: 16, display: 'flex', gap: 10, borderTop: '1px solid var(--border)', background: '#fff' }}>
-        <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={onBlock}>Bloquer</button>
-        <button type="button" className="btn btn-danger" style={{ flex: 1 }} onClick={onReport}>
-          <Flag size={15} /> Signaler
+      <div style={{ padding: 16, display: 'grid', gap: 10, borderTop: '1px solid var(--border)', background: '#fff' }}>
+        <button type="button" className="btn btn-danger" style={{ width: '100%' }} onClick={onDeleteConversation}>
+          <Trash2 size={15} /> Supprimer la discussion
         </button>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={onBlock}>Bloquer</button>
+          <button type="button" className="btn btn-danger" style={{ flex: 1 }} onClick={onReport}>
+            <Flag size={15} /> Signaler
+          </button>
+        </div>
       </div>
     </aside>
   );

@@ -11,7 +11,6 @@ import {
   Menu,
   MessageSquare,
   Search,
-  Wallet,
   User,
   Users,
   X,
@@ -25,9 +24,7 @@ const getNavigation = (user) => {
         { to: '/projects', label: 'Explorer', icon: Search },
         { to: '/login', label: 'Connexion', icon: User },
       ],
-      secondary: [
-        { to: '/register', label: 'Inscription', icon: User },
-      ],
+      secondary: [{ to: '/register', label: 'Inscription', icon: User }],
     };
   }
 
@@ -38,7 +35,6 @@ const getNavigation = (user) => {
   ];
 
   const secondary = [
-    ...(user ? [{ to: '/wallet', label: 'Portefeuille', icon: Wallet }] : []),
     { to: '/community', label: 'Communaute', icon: Users },
     { to: '/notifications', label: 'Notifications', icon: Bell },
     { to: '/profile', label: 'Profil', icon: User },
@@ -73,16 +69,10 @@ export default function MobileBottomNav() {
 
     const loadCounts = async () => {
       try {
-        const [conversationsRes, notificationsRes] = await Promise.all([
-          api.get('/conversations'),
-          api.get('/notifications'),
-        ]);
-
+        const [conversationsRes, notificationsRes] = await Promise.all([api.get('/conversations'), api.get('/notifications')]);
         if (!alive) return;
-
         const messageCount = (conversationsRes.data || []).reduce((sum, conv) => sum + (conv.unread_count || 0), 0);
         const notificationCount = (notificationsRes.data || []).filter((notification) => !notification.is_read).length;
-
         setUnreadMessages(messageCount);
         setUnreadNotifications(notificationCount);
       } catch {
@@ -100,34 +90,23 @@ export default function MobileBottomNav() {
     };
   }, [user, location.pathname]);
 
-  const isActive = (to) =>
-    location.pathname === to || (to !== '/' && location.pathname.startsWith(to));
+  const isActive = (to) => location.pathname === to || (to !== '/' && location.pathname.startsWith(to));
 
   return (
     <>
-      {open && <button type="button" className="mobile-bottom-sheet__backdrop" onClick={() => setOpen(false)} aria-label="Fermer le menu mobile" />}
+      {open ? <button type="button" className="mobile-bottom-sheet__backdrop" onClick={() => setOpen(false)} aria-label="Fermer le menu mobile" /> : null}
 
       <nav className="mobile-bottom-nav" aria-label="Navigation mobile">
         <div className="mobile-bottom-nav__inner" style={{ gridTemplateColumns: 'repeat(4, minmax(0, 1fr))' }}>
           {navigation.primary.map(({ to, label, icon: Icon }) => (
-            <Link
-              key={to}
-              to={to}
-              className={`mobile-bottom-nav__item ${isActive(to) ? 'is-active' : ''}`}
-            >
+            <Link key={to} to={to} className={`mobile-bottom-nav__item ${isActive(to) ? 'is-active' : ''}`}>
               <Icon size={18} />
               <span>{label}</span>
-              {to === '/messages' && unreadMessages > 0 && (
-                <span className="mobile-bottom-nav__badge">{unreadMessages > 9 ? '9+' : unreadMessages}</span>
-              )}
+              {to === '/messages' && unreadMessages > 0 ? <span className="mobile-bottom-nav__badge">{unreadMessages > 9 ? '9+' : unreadMessages}</span> : null}
             </Link>
           ))}
 
-          <button
-            type="button"
-            className={`mobile-bottom-nav__item ${open ? 'is-active' : ''}`}
-            onClick={() => setOpen((value) => !value)}
-          >
+          <button type="button" className={`mobile-bottom-nav__item ${open ? 'is-active' : ''}`} onClick={() => setOpen((value) => !value)}>
             {open ? <X size={18} /> : <Menu size={18} />}
             <span>Plus</span>
           </button>
@@ -138,31 +117,19 @@ export default function MobileBottomNav() {
         <div className="mobile-bottom-sheet__handle" />
         <div className="mobile-bottom-sheet__content">
           {navigation.secondary.map(({ to, label, icon: Icon }) => (
-            <Link
-              key={to}
-              to={to}
-              className={`mobile-bottom-sheet__item ${isActive(to) ? 'is-active' : ''}`}
-            >
+            <Link key={to} to={to} className={`mobile-bottom-sheet__item ${isActive(to) ? 'is-active' : ''}`}>
               <Icon size={18} />
               <span>{label}</span>
-              {to === '/notifications' && unreadNotifications > 0 && (
-                <span className="mobile-bottom-nav__badge mobile-bottom-nav__badge--sheet">
-                  {unreadNotifications > 9 ? '9+' : unreadNotifications}
-                </span>
-              )}
+              {to === '/notifications' && unreadNotifications > 0 ? <span className="mobile-bottom-nav__badge mobile-bottom-nav__badge--sheet">{unreadNotifications > 9 ? '9+' : unreadNotifications}</span> : null}
             </Link>
           ))}
 
-          {user && (
-            <button
-              type="button"
-              className="mobile-bottom-sheet__item is-danger"
-              onClick={logout}
-            >
+          {user ? (
+            <button type="button" className="mobile-bottom-sheet__item is-danger" onClick={logout}>
               <LogOut size={18} />
               <span>Deconnexion</span>
             </button>
-          )}
+          ) : null}
         </div>
       </div>
 

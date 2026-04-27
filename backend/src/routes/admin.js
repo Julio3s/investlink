@@ -6,6 +6,7 @@ const { authenticate, requireRole } = require('../middleware/auth');
 router.get('/dashboard', authenticate, requireRole('admin'), ctrl.getDashboard);
 router.get('/users', authenticate, requireRole('admin'), ctrl.getUsers);
 router.get('/sessions', authenticate, requireRole('admin'), ctrl.getSessions);
+router.get('/traffic-history', authenticate, requireRole('admin'), ctrl.getTrafficHistory);
 router.post('/users/:userId/suspend', authenticate, requireRole('admin'), ctrl.suspendUser);
 router.get('/reports', authenticate, requireRole('admin'), ctrl.getReports);
 router.put('/reports/:id', authenticate, requireRole('admin'), ctrl.resolveReport);

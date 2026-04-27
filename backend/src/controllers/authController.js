@@ -3,14 +3,12 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const pool = require('../config/db');
 const { uploadBuffer } = require('../utils/cloudinary');
-const { ensureWalletForUser } = require('./walletController');
 
 const generateToken = (user) =>
   jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE || '7d',
   });
 
-// POST /auth/register
 const register = async (req, res) => {
   try {
     const { email, password, role, first_name, last_name, phone, country } = req.body;
@@ -34,7 +32,6 @@ const register = async (req, res) => {
     );
 
     const user = result.rows[0];
-    await ensureWalletForUser(user.id);
     const token = generateToken(user);
 
     res.status(201).json({
@@ -51,14 +48,12 @@ const register = async (req, res) => {
   }
 };
 
-// POST /auth/login
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-
     const result = await pool.query(
-      `SELECT id, email, password_hash, role, first_name, last_name, is_active, is_suspended,
-       verification_status, trust_score, avatar_url FROM users WHERE email = $1`,
+      `SELECT id, email, password_hash, role, first_name, last_name, is_active, is_suspended, verification_status, trust_score, avatar_url
+       FROM users WHERE email = $1`,
       [email]
     );
 
@@ -70,7 +65,6 @@ const login = async (req, res) => {
     if (!valid) return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
 
     const token = generateToken(user);
-
     res.json({
       token,
       user: {
@@ -90,12 +84,11 @@ const login = async (req, res) => {
   }
 };
 
-// GET /auth/me
 const getMe = async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT id, email, role, first_name, last_name, phone, country, bio, avatar_url,
-       email_verified, verification_status, trust_score, created_at FROM users WHERE id = $1`,
+      `SELECT id, email, role, first_name, last_name, phone, country, bio, avatar_url, email_verified, verification_status, trust_score, created_at
+       FROM users WHERE id = $1`,
       [req.user.id]
     );
     res.json(result.rows[0]);
@@ -104,7 +97,6 @@ const getMe = async (req, res) => {
   }
 };
 
-// GET /auth/members
 const getMembers = async (req, res) => {
   try {
     const { q = '', role = '' } = req.query;
@@ -113,12 +105,7 @@ const getMembers = async (req, res) => {
     let i = 2;
 
     if (q) {
-      filters.push(`(
-        first_name ILIKE $${i}
-        OR last_name ILIKE $${i}
-        OR email ILIKE $${i}
-        OR country ILIKE $${i}
-      )`);
+      filters.push(`(first_name ILIKE $${i} OR last_name ILIKE $${i} OR email ILIKE $${i} OR country ILIKE $${i})`);
       values.push(`%${q}%`);
       i += 1;
     }
@@ -130,8 +117,7 @@ const getMembers = async (req, res) => {
     }
 
     const result = await pool.query(
-      `SELECT id, email, role, first_name, last_name, country, bio, avatar_url,
-              verification_status, trust_score, created_at
+      `SELECT id, email, role, first_name, last_name, country, bio, avatar_url, verification_status, trust_score, created_at
        FROM users
        WHERE ${filters.join(' AND ')}
        ORDER BY verification_status = 'verifie' DESC, trust_score DESC, created_at DESC`,
@@ -145,22 +131,17 @@ const getMembers = async (req, res) => {
   }
 };
 
-// GET /auth/members/:id
 const getMemberProfile = async (req, res) => {
   try {
     const { id } = req.params;
-
     const member = await pool.query(
-      `SELECT id, role, first_name, last_name, country, bio, avatar_url,
-              verification_status, trust_score, created_at
+      `SELECT id, role, first_name, last_name, country, bio, avatar_url, verification_status, trust_score, created_at
        FROM users
        WHERE id = $1 AND is_active = TRUE AND is_suspended = FALSE`,
       [id]
     );
 
-    if (!member.rows[0]) {
-      return res.status(404).json({ message: 'Membre introuvable' });
-    }
+    if (!member.rows[0]) return res.status(404).json({ message: 'Membre introuvable' });
 
     const projects = await pool.query(
       `SELECT id, title, sector, country, amount_sought, currency_code, image_url, status, created_at
@@ -181,13 +162,10 @@ const getMemberProfile = async (req, res) => {
   }
 };
 
-// PUT /auth/profile
 const updateProfile = async (req, res) => {
   try {
     const { first_name, last_name, phone, country, bio } = req.body;
-    const avatar_url = req.file
-      ? await uploadBuffer(req.file, { folder: 'investlink/avatars', resourceType: 'image' })
-      : undefined;
+    const avatar_url = req.file ? await uploadBuffer(req.file, { folder: 'investlink/avatars', resourceType: 'image' }) : undefined;
 
     const fields = [];
     const values = [];
@@ -203,11 +181,7 @@ const updateProfile = async (req, res) => {
     if (!fields.length) return res.status(400).json({ message: 'Aucun champ a mettre a jour' });
 
     values.push(req.user.id);
-    const result = await pool.query(
-      `UPDATE users SET ${fields.join(', ')} WHERE id = $${i} RETURNING id, email, role, first_name, last_name, phone, country, bio, avatar_url`,
-      values
-    );
-
+    const result = await pool.query(`UPDATE users SET ${fields.join(', ')} WHERE id = $${i} RETURNING id, email, role, first_name, last_name, phone, country, bio, avatar_url`, values);
     res.json(result.rows[0]);
   } catch (err) {
     console.error(err);

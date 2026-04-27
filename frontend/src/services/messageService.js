@@ -35,4 +35,9 @@ export const messageService = {
     const res = await api.post(`/conversations/${conversationId}/report`, { reason });
     return res.data;
   },
+
+  async deleteConversation(conversationId) {
+    const res = await api.delete(`/conversations/${conversationId}`);
+    return res.data;
+  },
 };

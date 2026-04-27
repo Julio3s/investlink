@@ -199,4 +199,24 @@ const reportConversation = async (req, res) => {
   }
 };
 
-module.exports = { createConversation, getUserConversations, getMessages, sendMessage, reportConversation };
+const deleteConversation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const conv = await pool.query(
+      'SELECT * FROM conversations WHERE id = $1 AND (user_1_id = $2 OR user_2_id = $2)',
+      [id, req.user.id]
+    );
+
+    if (!conv.rows[0]) return res.status(404).json({ message: 'Conversation introuvable' });
+
+    await pool.query('DELETE FROM notifications WHERE reference_id = $1 AND reference_type = $2', [id, 'conversation']);
+    await pool.query('DELETE FROM conversations WHERE id = $1', [id]);
+
+    res.json({ message: 'Conversation supprimée' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
+
+module.exports = { createConversation, getUserConversations, getMessages, sendMessage, reportConversation, deleteConversation };

@@ -1,7 +1,7 @@
-import { ArrowLeft, Info, MoreVertical, Phone, Search, Video } from 'lucide-react';
+import { ArrowLeft, Bot, Info, MoreVertical, Phone, Search, Video } from 'lucide-react';
 import Avatar from '../common/Avatar';
 
-export default function ChatHeader({ contact, status = 'Hors ligne', typing = false, onProfile, mobile = false, onBack, onToggleDetails }) {
+export default function ChatHeader({ contact, status = 'Hors ligne', typing = false, onProfile, mobile = false, onBack, onToggleDetails, onToggleAssistant }) {
   return (
     <header style={{ padding: mobile ? '14px 16px' : 18, borderBottom: '1px solid var(--border)', background: '#fff', display: 'flex', alignItems: 'center', gap: 12 }}>
       {mobile && onBack ? (
@@ -19,6 +19,9 @@ export default function ChatHeader({ contact, status = 'Hors ligne', typing = fa
       </button>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <button type="button" className="btn btn-ghost btn-sm" aria-label="Assistant IA" onClick={onToggleAssistant}>
+          <Bot size={17} />
+        </button>
         {mobile ? (
           <button type="button" className="btn btn-ghost btn-sm" aria-label="Informations du contact" onClick={onToggleDetails}>
             <Info size={17} />

@@ -16,8 +16,6 @@ import Profile from './pages/Profile';
 import PublicProfile from './pages/PublicProfile';
 import Admin from './pages/Admin';
 import Notifications from './pages/Notifications';
-import Wallet from './pages/Wallet';
-import WalletOperation from './pages/WalletOperation';
 
 const PrivateRoute = ({ children, roles }) => {
   const { user } = useAuth();
@@ -35,69 +33,18 @@ function AppRoutes() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/projects" element={<Projects />} />
-        <Route path="/projects/new" element={
-          <PrivateRoute roles={['porteur']}>
-            <CreateProject />
-          </PrivateRoute>
-        } />
-        <Route path="/projects/:id/edit" element={
-          <PrivateRoute roles={['porteur']}>
-            <CreateProject />
-          </PrivateRoute>
-        } />
+        <Route path="/projects/new" element={<PrivateRoute roles={['porteur']}><CreateProject /></PrivateRoute>} />
+        <Route path="/projects/:id/edit" element={<PrivateRoute roles={['porteur']}><CreateProject /></PrivateRoute>} />
         <Route path="/projects/:id" element={<ProjectDetail />} />
-
-        <Route path="/create-project" element={
-          <PrivateRoute roles={['porteur']}>
-            <CreateProject />
-          </PrivateRoute>
-        } />
-        <Route path="/my-projects" element={
-          <PrivateRoute roles={['porteur']}>
-            <MyProjects />
-          </PrivateRoute>
-        } />
-        <Route path="/messages" element={
-          <PrivateRoute>
-            <Messages />
-          </PrivateRoute>
-        } />
-        <Route path="/community" element={
-          <PrivateRoute>
-            <Community />
-          </PrivateRoute>
-        } />
-        <Route path="/messages/:conversationId" element={
-          <PrivateRoute>
-            <Messages />
-          </PrivateRoute>
-        } />
-        <Route path="/profile" element={
-          <PrivateRoute>
-            <Profile />
-          </PrivateRoute>
-        } />
-        <Route path="/wallet" element={
-          <PrivateRoute>
-            <Wallet />
-          </PrivateRoute>
-        } />
-        <Route path="/wallet/:operation" element={
-          <PrivateRoute>
-            <WalletOperation />
-          </PrivateRoute>
-        } />
+        <Route path="/create-project" element={<PrivateRoute roles={['porteur']}><CreateProject /></PrivateRoute>} />
+        <Route path="/my-projects" element={<PrivateRoute roles={['porteur']}><MyProjects /></PrivateRoute>} />
+        <Route path="/messages" element={<PrivateRoute><Messages /></PrivateRoute>} />
+        <Route path="/community" element={<PrivateRoute><Community /></PrivateRoute>} />
+        <Route path="/messages/:conversationId" element={<PrivateRoute><Messages /></PrivateRoute>} />
+        <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
         <Route path="/members/:id" element={<PublicProfile />} />
-        <Route path="/notifications" element={
-          <PrivateRoute>
-            <Notifications />
-          </PrivateRoute>
-        } />
-        <Route path="/admin" element={
-          <PrivateRoute roles={['admin']}>
-            <Admin />
-          </PrivateRoute>
-        } />
+        <Route path="/notifications" element={<PrivateRoute><Notifications /></PrivateRoute>} />
+        <Route path="/admin" element={<PrivateRoute roles={['admin']}><Admin /></PrivateRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <MobileBottomNav />

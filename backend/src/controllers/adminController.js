@@ -2,17 +2,7 @@ const pool = require('../config/db');
 
 const getDashboard = async (req, res) => {
   try {
-    const [
-      users,
-      projects,
-      pendingKyc,
-      reports,
-      conversations,
-      sessions,
-      authenticatedSessions,
-      activeVisitors,
-      uniqueDevices,
-    ] = await Promise.all([
+    const [users, projects, pendingKyc, reports, conversations, sessions, authenticatedSessions, activeVisitors, uniqueDevices] = await Promise.all([
       pool.query('SELECT COUNT(*) FROM users'),
       pool.query('SELECT COUNT(*) FROM projects'),
       pool.query("SELECT COUNT(*) FROM kyc_verifications WHERE status='en_attente'"),
@@ -61,8 +51,8 @@ const getUsers = async (req, res) => {
     values.push(limit, offset);
 
     const result = await pool.query(
-      `SELECT id, email, role, first_name, last_name, verification_status, trust_score,
-       is_active, is_suspended, created_at FROM users ${where}
+      `SELECT id, email, role, first_name, last_name, verification_status, trust_score, is_active, is_suspended, created_at
+       FROM users ${where}
        ORDER BY created_at DESC LIMIT $${i++} OFFSET $${i}`,
       values
     );
@@ -81,21 +71,11 @@ const getSessions = async (req, res) => {
     const [sessionsResult, summaryResult] = await Promise.all([
       pool.query(
         `SELECT
-          s.session_key AS id,
-          s.visitor_id,
-          s.user_id,
+          s.session_key AS id, s.visitor_id, s.user_id,
           COALESCE(u.first_name || ' ' || u.last_name, 'Visiteur') AS visitor_name,
-          u.email AS user_email,
-          u.role AS user_role,
-          s.ip_address,
-          s.device_name,
-          s.user_agent,
-          s.first_seen_at,
-          s.last_seen_at,
-          s.request_count,
-          s.last_path,
-          s.last_method,
-          s.is_authenticated
+          u.email AS user_email, u.role AS user_role,
+          s.ip_address, s.device_name, s.user_agent, s.first_seen_at, s.last_seen_at,
+          s.request_count, s.last_path, s.last_method, s.is_authenticated
         FROM analytics_sessions s
         LEFT JOIN users u ON u.id = s.user_id
         ORDER BY s.last_seen_at DESC
@@ -120,11 +100,25 @@ const getSessions = async (req, res) => {
         authenticated_sessions: parseInt(authenticatedSessions.rows[0].count, 10),
         active_last_24h: parseInt(activeLast24h.rows[0].count, 10),
       },
-      pagination: {
-        page,
-        limit,
-      },
+      pagination: { page, limit },
     });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
+
+const getTrafficHistory = async (req, res) => {
+  try {
+    const limit = Math.min(Math.max(parseInt(req.query.limit || '100', 10), 1), 200);
+    const result = await pool.query(
+      `SELECT t.*, COALESCE(u.first_name || ' ' || u.last_name, 'Visiteur') AS visitor_name, u.email AS user_email
+       FROM traffic_history t
+       LEFT JOIN users u ON u.id = t.user_id
+       ORDER BY t.created_at DESC
+       LIMIT $1`,
+      [limit]
+    );
+    res.json(result.rows);
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur' });
   }
@@ -136,10 +130,7 @@ const suspendUser = async (req, res) => {
     const { suspend, reason } = req.body;
     await pool.query('UPDATE users SET is_suspended=$1 WHERE id=$2', [suspend, userId]);
     if (suspend) {
-      await pool.query(
-        'INSERT INTO notifications (user_id, type, title, message) VALUES ($1,$2,$3,$4)',
-        [userId, 'account_action', 'Compte suspendu', reason || 'Votre compte a été suspendu par un administrateur']
-      );
+      await pool.query('INSERT INTO notifications (user_id, type, title, message) VALUES ($1,$2,$3,$4)', [userId, 'account_action', 'Compte suspendu', reason || 'Votre compte a été suspendu par un administrateur']);
     }
     res.json({ message: `Utilisateur ${suspend ? 'suspendu' : 'réactivé'}` });
   } catch (err) {
@@ -150,9 +141,7 @@ const suspendUser = async (req, res) => {
 const getReports = async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT r.*,
-       reporter.first_name AS reporter_first, reporter.last_name AS reporter_last,
-       reported.first_name AS reported_first, reported.last_name AS reported_last
+      `SELECT r.*, reporter.first_name AS reporter_first, reporter.last_name AS reporter_last, reported.first_name AS reported_first, reported.last_name AS reported_last
        FROM reports r
        LEFT JOIN users reporter ON reporter.id = r.reporter_id
        LEFT JOIN users reported ON reported.id = r.reported_user_id
@@ -168,10 +157,7 @@ const resolveReport = async (req, res) => {
   try {
     const { id } = req.params;
     const { status, admin_note } = req.body;
-    await pool.query(
-      'UPDATE reports SET status=$1, admin_note=$2 WHERE id=$3',
-      [status, admin_note, id]
-    );
+    await pool.query('UPDATE reports SET status=$1, admin_note=$2 WHERE id=$3', [status, admin_note, id]);
     res.json({ message: 'Signalement traité' });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur' });
@@ -185,10 +171,7 @@ const moderateProject = async (req, res) => {
     if (action === 'validate') {
       await pool.query('UPDATE projects SET is_validated=TRUE WHERE id=$1', [id]);
       const p = await pool.query('SELECT owner_id, title FROM projects WHERE id=$1', [id]);
-      await pool.query(
-        'INSERT INTO notifications (user_id, type, title, message) VALUES ($1,$2,$3,$4)',
-        [p.rows[0].owner_id, 'project_validated', 'Projet validé', `Votre projet "${p.rows[0].title}" a été validé.`]
-      );
+      await pool.query('INSERT INTO notifications (user_id, type, title, message) VALUES ($1,$2,$3,$4)', [p.rows[0].owner_id, 'project_validated', 'Projet validé', `Votre projet "${p.rows[0].title}" a été validé.`]);
     } else if (action === 'flag') {
       await pool.query('UPDATE projects SET is_flagged=TRUE WHERE id=$1', [id]);
     } else if (action === 'remove') {
@@ -200,4 +183,4 @@ const moderateProject = async (req, res) => {
   }
 };
 
-module.exports = { getDashboard, getUsers, getSessions, suspendUser, getReports, resolveReport, moderateProject };
+module.exports = { getDashboard, getUsers, getSessions, getTrafficHistory, suspendUser, getReports, resolveReport, moderateProject };

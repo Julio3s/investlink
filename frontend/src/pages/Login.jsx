@@ -21,7 +21,9 @@ export default function Login() {
       else navigate('/projects');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Erreur de connexion');
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -41,7 +43,7 @@ export default function Login() {
                 type="email"
                 placeholder="votre@email.com"
                 value={form.email}
-                onChange={e => setForm({ ...form, email: e.target.value })}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
                 required
               />
             </div>
@@ -53,7 +55,7 @@ export default function Login() {
                   type={showPw ? 'text' : 'password'}
                   placeholder="••••••••"
                   value={form.password}
-                  onChange={e => setForm({ ...form, password: e.target.value })}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
                   required
                   style={{ paddingRight: 44 }}
                 />
@@ -73,13 +75,9 @@ export default function Login() {
           <div className="divider" />
           <p style={{ textAlign: 'center', color: 'var(--text-2)', fontSize: 14 }}>
             Pas encore de compte ?{' '}
-            <Link to="/register" style={{ color: 'var(--primary)', fontWeight: 600 }}>S'inscrire</Link>
+            <Link to="/register" style={{ color: 'var(--primary)', fontWeight: 600 }}>S&apos;inscrire</Link>
           </p>
         </div>
-
-        <p style={{ textAlign: 'center', color: 'var(--text-3)', fontSize: 12, marginTop: 16 }}>
-          Compte démo admin: admin@investlink.com / password
-        </p>
       </div>
     </div>
   );

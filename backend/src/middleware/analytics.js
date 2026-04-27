@@ -5,7 +5,6 @@ const getIpAddress = (req) => {
   if (typeof forwarded === 'string' && forwarded.length > 0) {
     return forwarded.split(',')[0].trim();
   }
-
   return req.ip || req.socket?.remoteAddress || 'unknown';
 };
 
@@ -36,7 +35,6 @@ const getSessionKey = (req) => {
   if (typeof visitorId === 'string' && visitorId.trim()) {
     return `visitor:${visitorId.trim()}`;
   }
-
   return `${userPart}:${ipAddress}:${userAgent}`;
 };
 
@@ -46,6 +44,18 @@ const persistSession = async (req, { userId = null, increment = true } = {}) => 
   const ipAddress = getIpAddress(req);
   const sessionKey = getSessionKey(req);
   const deviceName = getDeviceName(userAgent);
+
+  const params = [
+    sessionKey,
+    visitorId,
+    userId,
+    ipAddress,
+    userAgent,
+    deviceName,
+    req.originalUrl || req.url || '/',
+    req.method || 'GET',
+    Boolean(userId),
+  ];
 
   if (increment) {
     await pool.query(
@@ -63,17 +73,7 @@ const persistSession = async (req, { userId = null, increment = true } = {}) => 
         is_authenticated = analytics_sessions.is_authenticated OR EXCLUDED.is_authenticated,
         request_count = analytics_sessions.request_count + 1,
         last_seen_at = NOW()`,
-      [
-        sessionKey,
-        visitorId,
-        userId,
-        ipAddress,
-        userAgent,
-        deviceName,
-        req.originalUrl || req.url || '/',
-        req.method || 'GET',
-        Boolean(userId),
-      ]
+      params
     );
     return;
   }
@@ -92,6 +92,21 @@ const persistSession = async (req, { userId = null, increment = true } = {}) => 
       last_method = EXCLUDED.last_method,
       is_authenticated = analytics_sessions.is_authenticated OR EXCLUDED.is_authenticated,
       last_seen_at = NOW()`,
+    params
+  );
+};
+
+const persistTrafficEvent = async (req, { userId = null, statusCode = 200 } = {}) => {
+  const visitorId = typeof req.headers['x-visitor-id'] === 'string' ? req.headers['x-visitor-id'].trim() : null;
+  const userAgent = req.headers['user-agent'] || 'unknown';
+  const ipAddress = getIpAddress(req);
+  const sessionKey = getSessionKey(req);
+  const deviceName = getDeviceName(userAgent);
+
+  await pool.query(
+    `INSERT INTO traffic_history (
+      session_key, visitor_id, user_id, ip_address, user_agent, device_name, path, method, status_code, is_authenticated
+    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
     [
       sessionKey,
       visitorId,
@@ -101,6 +116,7 @@ const persistSession = async (req, { userId = null, increment = true } = {}) => 
       deviceName,
       req.originalUrl || req.url || '/',
       req.method || 'GET',
+      statusCode,
       Boolean(userId),
     ]
   );
@@ -111,6 +127,7 @@ const trackVisitor = (req, res, next) => {
 
   res.on('finish', () => {
     persistSession(req).catch(() => {});
+    persistTrafficEvent(req, { userId: req.user?.id || null, statusCode: res.statusCode }).catch(() => {});
   });
 
   return next();
@@ -120,9 +137,4 @@ const trackAuthenticatedSession = async (req) => {
   await persistSession(req, { userId: req.user?.id, increment: false });
 };
 
-module.exports = {
-  trackVisitor,
-  trackAuthenticatedSession,
-  getIpAddress,
-  getDeviceName,
-};
+module.exports = { trackVisitor, trackAuthenticatedSession, getIpAddress, getDeviceName };

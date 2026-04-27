@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { formatDistanceToNow } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import CoverImage from '../components/common/CoverImage';
@@ -17,47 +19,16 @@ import {
   Sparkles,
   TrendingUp,
   Users,
-  Wallet,
   Zap,
 } from 'lucide-react';
 
 const FEATURES = [
-  {
-    icon: Shield,
-    title: 'Vérification systématique',
-    desc: "Chaque profil fait l'objet d'un contrôle d'identité rigoureux. Nous ne transigeons pas avec la sécurité des membres.",
-    color: '#2ecc71',
-  },
-  {
-    icon: TrendingUp,
-    title: 'Évaluation continue',
-    desc: "Notre indicateur de confiance reflète l'engagement et la fiabilité. Un baromètre objectif, mis à jour en permanence.",
-    color: '#d4a853',
-  },
-  {
-    icon: MessageSquare,
-    title: 'Correspondance privée',
-    desc: 'Un canal de communication direct, horodaté et archivé. Chaque échange compte, chaque accord laisse une trace.',
-    color: '#8b6914',
-  },
-  {
-    icon: Search,
-    title: 'Recherche précise',
-    desc: "Filtre par secteur d'activité, zone géographique ou volume de financement. Ne perds plus de temps sur des projets hors cible.",
-    color: '#f59e0b',
-  },
-  {
-    icon: CheckCircle,
-    title: 'Sélection exigeante',
-    desc: 'Nos équipes examinent chaque dossier avant publication. Seuls les projets documentés et cohérents sont retenus.',
-    color: '#06b6d4',
-  },
-  {
-    icon: Sparkles,
-    title: 'Assistance algorithmique',
-    desc: 'Notre intelligence artificielle identifie les correspondances pertinentes et signale les anomalies éventuelles. Un allié discret.',
-    color: '#ec4899',
-  },
+  { icon: Shield, title: 'Vérification systématique', desc: "Chaque profil fait l'objet d'un contrôle d'identité rigoureux. Nous ne transigeons pas avec la sécurité des membres.", color: '#2ecc71' },
+  { icon: TrendingUp, title: 'Évaluation continue', desc: "Notre indicateur de confiance reflète l'engagement et la fiabilité. Un baromètre objectif, mis à jour en permanence.", color: '#d4a853' },
+  { icon: MessageSquare, title: 'Correspondance privée', desc: 'Un canal de communication direct, horodaté et archivé. Chaque échange compte, chaque accord laisse une trace.', color: '#8b6914' },
+  { icon: Search, title: 'Recherche précise', desc: "Filtre par secteur d'activité, zone géographique ou volume de financement. Ne perds plus de temps sur des projets hors cible.", color: '#f59e0b' },
+  { icon: CheckCircle, title: 'Sélection exigeante', desc: 'Nos équipes examinent chaque dossier avant publication. Seuls les projets documentés et cohérents sont retenus.', color: '#06b6d4' },
+  { icon: Sparkles, title: 'Assistance algorithmique', desc: 'Notre intelligence artificielle identifie les correspondances pertinentes et signale les anomalies éventuelles. Un allié discret.', color: '#ec4899' },
 ];
 
 const STATS = [
@@ -102,17 +73,11 @@ function ProjectPreview({ project }) {
   return (
     <Link to={`/projects/${project.id}`} className="card project-card glow-card">
       <div style={{ height: 180, position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, rgba(31,95,191,0.16), rgba(201,154,46,0.14))' }}>
-        <CoverImage
-          src={project.image_url}
-          alt={project.title}
-          style={{ width: '100%', height: '100%' }}
-          imgStyle={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          fallback={<div style={{ width: '100%', height: '100%' }} />}
-        />
+        <CoverImage src={project.image_url} alt={project.title} style={{ width: '100%', height: '100%' }} imgStyle={{ width: '100%', height: '100%', objectFit: 'cover' }} fallback={<div style={{ width: '100%', height: '100%' }} />} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 35%, rgba(24,49,83,0.72) 100%)' }} />
         <div style={{ position: 'absolute', left: 16, right: 16, bottom: 16, display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
           <span className="badge badge-sector">{project.sector || 'Général'}</span>
-          {project.status && <span className="badge badge-pending">{project.status}</span>}
+          {project.status ? <span className="badge badge-pending">{project.status}</span> : null}
         </div>
       </div>
 
@@ -140,10 +105,11 @@ export default function Home() {
   const dashboardStats = user?.stats || {};
   const [featuredProjects, setFeaturedProjects] = useState([]);
   const [projectsLoading, setProjectsLoading] = useState(true);
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [activityLoading, setActivityLoading] = useState(Boolean(user));
 
   useEffect(() => {
     let alive = true;
-
     (async () => {
       try {
         const res = await api.get('/projects', { params: { page: 1, limit: 4, sort: 'recent' } });
@@ -154,11 +120,24 @@ export default function Home() {
         if (alive) setProjectsLoading(false);
       }
     })();
-
-    return () => {
-      alive = false;
-    };
+    return () => { alive = false; };
   }, []);
+
+  useEffect(() => {
+    if (!user) return undefined;
+    let alive = true;
+    (async () => {
+      try {
+        const res = await api.get('/notifications');
+        if (alive) setRecentActivity((res.data || []).slice(0, 3));
+      } catch {
+        if (alive) setRecentActivity([]);
+      } finally {
+        if (alive) setActivityLoading(false);
+      }
+    })();
+    return () => { alive = false; };
+  }, [user]);
 
   return (
     <div>
@@ -169,12 +148,8 @@ export default function Home() {
               <div className="card animate-in" style={{ padding: 28 }}>
                 <div className="responsive-row" style={{ justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
                   <div>
-                    <h1 style={{ fontSize: 34, fontWeight: 800, letterSpacing: '-0.04em', marginBottom: 8 }}>
-                      {firstName ? `Bonjour, ${firstName}` : 'Bonjour'}
-                    </h1>
-                    <p style={{ color: 'var(--text-2)', fontSize: 15 }}>
-                      Votre espace de travail. Suivez l&apos;évolution de vos projets et de vos échanges.
-                    </p>
+                    <h1 style={{ fontSize: 34, fontWeight: 800, letterSpacing: '-0.04em', marginBottom: 8 }}>{firstName ? `Bonjour, ${firstName}` : 'Bonjour'}</h1>
+                    <p style={{ color: 'var(--text-2)', fontSize: 15 }}>Votre espace de travail. Suivez l&apos;évolution de vos projets et de vos échanges.</p>
                   </div>
                 </div>
 
@@ -189,9 +164,6 @@ export default function Home() {
                     <Link to="/projects/new" className="btn btn-primary mobile-full-width">
                       <PlusCircle size={16} /> Publier un projet
                     </Link>
-                    <Link to="/wallet" className="btn btn-outline mobile-full-width">
-                      <Wallet size={16} /> Portefeuille
-                    </Link>
                   </div>
                 </div>
               </div>
@@ -203,21 +175,21 @@ export default function Home() {
               <div style={{ marginBottom: 20 }}>
                 <h2 className="section-title" style={{ fontSize: 24 }}>Vue d&apos;ensemble</h2>
               </div>
-              <div className="responsive-stats-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 16 }}>
+              <div className="responsive-stats-4">
                 <div className="card">
-                  <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--gold)' }}>{dashboardStats.projetsVues || 0}</div>
+                  <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--gold)', overflowWrap: 'anywhere' }}>{dashboardStats.projetsVues || 0}</div>
                   <div style={{ color: 'var(--text-2)', fontSize: 12 }}>Consultations</div>
                 </div>
                 <div className="card">
-                  <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--gold)' }}>{dashboardStats.messages || 0}</div>
+                  <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--gold)', overflowWrap: 'anywhere' }}>{dashboardStats.messages || 0}</div>
                   <div style={{ color: 'var(--text-2)', fontSize: 12 }}>Messages reçus</div>
                 </div>
                 <div className="card">
-                  <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--gold)' }}>{dashboardStats.favoris || 0}</div>
+                  <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--gold)', overflowWrap: 'anywhere' }}>{dashboardStats.favoris || 0}</div>
                   <div style={{ color: 'var(--text-2)', fontSize: 12 }}>Projets suivis</div>
                 </div>
                 <div className="card">
-                  <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--gold)' }}>{dashboardStats.scoreConfiance || 0}%</div>
+                  <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--gold)', overflowWrap: 'anywhere' }}>{dashboardStats.scoreConfiance || 0}%</div>
                   <div style={{ color: 'var(--text-2)', fontSize: 12 }}>Indice de confiance</div>
                 </div>
               </div>
@@ -227,12 +199,8 @@ export default function Home() {
           <section style={{ padding: '24px 0' }}>
             <div className="container">
               <div className="responsive-row" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <h2 className="section-title" style={{ fontSize: 24 }}>
-                  {featuredProjects.length === 1 ? 'Projet du moment' : 'Opportunités suggérées'}
-                </h2>
-                <Link to="/projects" className="btn btn-ghost btn-sm">
-                  Consulter l&apos;ensemble <ArrowRight size={16} />
-                </Link>
+                <h2 className="section-title" style={{ fontSize: 24 }}>{featuredProjects.length === 1 ? 'Projet du moment' : 'Opportunités suggérées'}</h2>
+                <Link to="/projects" className="btn btn-ghost btn-sm">Consulter l&apos;ensemble <ArrowRight size={16} /></Link>
               </div>
 
               {projectsLoading ? (
@@ -240,9 +208,7 @@ export default function Home() {
                   {[...Array(3)].map((_, index) => <div key={index} className="card loading-pulse" style={{ height: 320 }} />)}
                 </div>
               ) : featuredProjects.length === 0 ? (
-                <div className="card" style={{ textAlign: 'center', color: 'var(--text-3)', padding: '56px 24px' }}>
-                  Aucun projet n&apos;est encore publié.
-                </div>
+                <div className="card" style={{ textAlign: 'center', color: 'var(--text-3)', padding: '56px 24px' }}>Aucun projet n&apos;est encore publié.</div>
               ) : (
                 <div className="project-grid">
                   {featuredProjects.map((project) => <ProjectPreview key={project.id} project={project} />)}
@@ -255,22 +221,25 @@ export default function Home() {
             <div className="container">
               <div className="responsive-row" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                 <h2 className="section-title" style={{ fontSize: 24 }}>Activité récente</h2>
-                <Link to="/notifications" className="btn btn-ghost btn-sm">
-                  Historique complet <ArrowRight size={16} />
-                </Link>
+                <Link to="/notifications" className="btn btn-ghost btn-sm">Historique complet <ArrowRight size={16} /></Link>
               </div>
 
               <div className="card" style={{ display: 'grid', gap: 14 }}>
-                {[
-                  ['Sophie Laurent a ajouté EcoPulse à sa liste de projets à suivre.', 'Il y a deux heures'],
-                  ['Marc Dubois vous a adressé un message concernant MediChain.', 'Il y a cinq heures'],
-                  ['Votre indice de confiance a progressé de cinq points.', 'Hier'],
-                ].map(([text, time]) => (
-                  <div key={text} style={{ display: 'flex', justifyContent: 'space-between', gap: 16, borderBottom: '1px solid var(--border)', paddingBottom: 14 }}>
-                    <div>{text}</div>
-                    <div style={{ color: 'var(--text-3)', whiteSpace: 'nowrap' }}>{time}</div>
-                  </div>
-                ))}
+                {activityLoading ? (
+                  [...Array(3)].map((_, index) => <div key={index} className="loading-pulse" style={{ height: 52, borderRadius: 12, background: 'var(--bg-3)' }} />)
+                ) : recentActivity.length === 0 ? (
+                  <div style={{ color: 'var(--text-3)', textAlign: 'center', padding: '16px 8px' }}>Aucune activité récente pour le moment.</div>
+                ) : (
+                  recentActivity.map((item, index) => (
+                    <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 16, borderBottom: index === recentActivity.length - 1 ? 'none' : '1px solid var(--border)', paddingBottom: index === recentActivity.length - 1 ? 0 : 14 }}>
+                      <div>
+                        <div style={{ fontWeight: 600 }}>{item.title}</div>
+                        <div style={{ color: 'var(--text-2)', fontSize: 14 }}>{item.message}</div>
+                      </div>
+                      <div style={{ color: 'var(--text-3)', whiteSpace: 'nowrap', fontSize: 13 }}>{formatDistanceToNow(new Date(item.created_at), { addSuffix: true, locale: fr })}</div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </section>
@@ -283,24 +252,12 @@ export default function Home() {
                 <div className="badge" style={{ marginBottom: 24, fontSize: 13, background: 'rgba(255,255,255,0.82)', color: 'var(--primary)', border: '1px solid rgba(31,95,191,0.16)', boxShadow: '0 12px 30px rgba(24,49,83,0.08)' }}>
                   <Shield size={12} /> La rigueur avant l&apos;enthousiasme
                 </div>
-
-                <h1 className="hero-title" style={{ marginBottom: 24 }}>
-                  Trouver le financement juste, pour le projet <span className="gradient-text" style={{ fontStyle: 'italic' }}>juste</span>, au moment juste
-                </h1>
-
-                <p className="hero-copy" style={{ marginBottom: 40 }}>
-                  InvestLink met en relation des porteurs de projets sérieux et des investisseurs avisés. Sans intermédiaire superflu. Sans promesse inconsidérée. Avec méthode.
-                </p>
-
+                <h1 className="hero-title" style={{ marginBottom: 24 }}>Trouver le financement juste, pour le projet <span className="gradient-text" style={{ fontStyle: 'italic' }}>juste</span>, au moment juste</h1>
+                <p className="hero-copy" style={{ marginBottom: 40 }}>InvestLink met en relation des porteurs de projets sérieux et des investisseurs avisés. Sans intermédiaire superflu. Sans promesse inconsidérée. Avec méthode.</p>
                 <div className="hero-actions" style={{ marginBottom: 0 }}>
-                  <Link to="/register" className="btn btn-primary btn-lg">
-                    <Rocket size={18} /> Présenter mon projet
-                  </Link>
-                  <Link to="/projects" className="btn btn-outline btn-lg">
-                    <Search size={16} /> Consulter les opportunités
-                  </Link>
+                  <Link to="/register" className="btn btn-primary btn-lg"><Rocket size={18} /> Présenter mon projet</Link>
+                  <Link to="/projects" className="btn btn-outline btn-lg"><Search size={16} /> Consulter les opportunités</Link>
                 </div>
-
                 <HeroStats />
               </div>
             </div>
@@ -310,9 +267,7 @@ export default function Home() {
             <div className="container">
               <div style={{ textAlign: 'center', marginBottom: 60 }}>
                 <h2 className="section-title">Notre méthode en six principes</h2>
-                <p style={{ color: 'var(--text-2)', marginTop: 12, maxWidth: 560, marginInline: 'auto' }}>
-                  Une discipline claire, des critères constants et une exécution attentive à chaque étape.
-                </p>
+                <p style={{ color: 'var(--text-2)', marginTop: 12, maxWidth: 560, marginInline: 'auto' }}>Une discipline claire, des critères constants et une exécution attentive à chaque étape.</p>
               </div>
               <div className="feature-grid">
                 {FEATURES.map((feature) => <FeatureCard key={feature.title} {...feature} />)}
@@ -323,20 +278,11 @@ export default function Home() {
           <section style={{ padding: '80px 0', borderTop: '1px solid var(--border)' }}>
             <div className="container">
               <div style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.96), rgba(237,244,255,0.96))', border: '1px solid rgba(201,154,46,0.26)', borderRadius: 24, padding: '60px 40px', textAlign: 'center', boxShadow: '0 24px 60px rgba(24,49,83,0.08)' }}>
-                <h2 style={{ fontSize: 36, fontWeight: 800, letterSpacing: '-0.03em', marginBottom: 16 }}>
-                  Prenez une décision éclairée
-                </h2>
-                <p style={{ color: 'var(--text-2)', fontSize: 16, marginBottom: 32 }}>
-                  Des centaines de projets et d&apos;investisseurs utilisent déjà notre plateforme. Rejoignez-les en toute confiance.
-                </p>
-
+                <h2 style={{ fontSize: 36, fontWeight: 800, letterSpacing: '-0.03em', marginBottom: 16 }}>Prenez une décision éclairée</h2>
+                <p style={{ color: 'var(--text-2)', fontSize: 16, marginBottom: 32 }}>Des centaines de projets et d&apos;investisseurs utilisent déjà notre plateforme. Rejoignez-les en toute confiance.</p>
                 <div className="hero-actions" style={{ justifyContent: 'center' }}>
-                  <Link to="/register?role=porteur" className="btn btn-primary btn-lg">
-                    <FileText size={18} /> Déposer un projet
-                  </Link>
-                  <Link to="/register?role=investisseur" className="btn btn-outline btn-lg">
-                    <Briefcase size={18} /> Étudier les dossiers
-                  </Link>
+                  <Link to="/register?role=porteur" className="btn btn-primary btn-lg"><FileText size={18} /> Déposer un projet</Link>
+                  <Link to="/register?role=investisseur" className="btn btn-outline btn-lg"><Briefcase size={18} /> Étudier les dossiers</Link>
                 </div>
               </div>
             </div>

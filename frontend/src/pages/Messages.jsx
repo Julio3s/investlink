@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { MessageSquare } from 'lucide-react';
+import { Bot, MessageSquare, Send, X } from 'lucide-react';
+import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { messageService } from '../services/messageService';
 import { useConversations } from '../hooks/useConversations';
@@ -26,6 +27,12 @@ export default function Messages() {
   const [mobile, setMobile] = useState(() => window.innerWidth < 768);
   const [showContact, setShowContact] = useState(false);
   const [hydratingConversation, setHydratingConversation] = useState(false);
+  const [showAssistant, setShowAssistant] = useState(false);
+  const [assistantInput, setAssistantInput] = useState('');
+  const [assistantMessages, setAssistantMessages] = useState([
+    { role: 'assistant', content: 'Je suis InvestBot. Posez une question sur un dossier ou une correspondance.' },
+  ]);
+  const [assistantLoading, setAssistantLoading] = useState(false);
 
   const { conversations, search, setSearch, loading, error, reload, unreadCount, setConversations } = useConversations();
   const { groupedMessages, loading: messagesLoading, sending, send, loadMore, setMessages } = useMessages(activeConversation?.id, user.id);
@@ -144,6 +151,42 @@ export default function Messages() {
     }
   };
 
+  const onDeleteConversation = async () => {
+    if (!activeConversation?.id) return;
+    if (!window.confirm('Supprimer définitivement cette discussion ?')) return;
+
+    try {
+      await messageService.deleteConversation(activeConversation.id);
+      setConversations((prev) => prev.filter((row) => row.id !== activeConversation.id));
+      setActiveConversation(null);
+      setShowContact(false);
+      setShowAssistant(false);
+      navigate('/messages', { replace: true });
+      toast.success('Discussion supprimée');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Suppression impossible');
+    }
+  };
+
+  const onSendAssistant = async (event) => {
+    event.preventDefault();
+    if (!assistantInput.trim()) return;
+
+    const userMessage = { role: 'user', content: assistantInput.trim() };
+    setAssistantMessages((prev) => [...prev, userMessage]);
+    setAssistantInput('');
+    setAssistantLoading(true);
+
+    try {
+      const res = await api.post('/ai/chat', { messages: [...assistantMessages, userMessage] });
+      setAssistantMessages((prev) => [...prev, { role: 'assistant', content: res.data.reply }]);
+    } catch {
+      setAssistantMessages((prev) => [...prev, { role: 'assistant', content: 'Une erreur est survenue. Réessayez.' }]);
+    } finally {
+      setAssistantLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!socket || !activeConversation?.id) return undefined;
 
@@ -199,6 +242,7 @@ export default function Messages() {
         mobile={mobile}
         onBack={mobile ? () => navigate('/messages', { replace: true }) : undefined}
         onToggleDetails={mobile ? () => setShowContact(true) : undefined}
+        onToggleAssistant={() => setShowAssistant((value) => !value)}
         onProfile={() => navigate(`/members/${otherParticipantId}`)}
       />
       {messagesLoading ? (
@@ -256,6 +300,7 @@ export default function Messages() {
       onOpenProfile={() => navigate(`/members/${otherParticipantId}`)}
       onBlock={() => toast('Blocage à connecter au backend')}
       onReport={() => messageService.reportConversation(activeConversation.id, prompt('Motif du signalement :') || '')}
+      onDeleteConversation={onDeleteConversation}
       sharedFiles={sharedFiles}
       sharedProjects={sharedProjects}
     />
@@ -283,6 +328,45 @@ export default function Messages() {
             )
           }
         />
+
+        {activeConversation && showAssistant ? (
+          <div className="messages-ai-shell">
+            <section className="messages-ai-panel">
+              <div className="messages-ai-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, borderBottom: '1px solid var(--border)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <Bot size={16} style={{ color: 'var(--primary)' }} />
+                  <strong>InvestBot</strong>
+                </div>
+                <button type="button" className="btn btn-ghost btn-sm" onClick={() => setShowAssistant(false)} aria-label="Fermer l'assistant">
+                  <X size={15} />
+                </button>
+              </div>
+
+              <div className="messages-ai-body" style={{ flex: 1, padding: 16, display: 'grid', gap: 10 }}>
+                {assistantMessages.map((message, index) => (
+                  <div key={`${message.role}-${index}`} style={{ display: 'flex', justifyContent: message.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                    <div style={{ maxWidth: '88%', padding: '10px 12px', borderRadius: 14, background: message.role === 'user' ? 'linear-gradient(135deg, var(--primary), #2d73dc)' : 'var(--bg-3)', color: message.role === 'user' ? '#fff' : 'var(--text)', lineHeight: 1.5 }}>
+                      {message.content}
+                    </div>
+                  </div>
+                ))}
+                {assistantLoading ? <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Réflexion en cours...</div> : null}
+              </div>
+
+              <form className="messages-ai-footer" onSubmit={onSendAssistant} style={{ display: 'flex', gap: 8, borderTop: '1px solid var(--border)' }}>
+                <input
+                  className="input"
+                  value={assistantInput}
+                  onChange={(event) => setAssistantInput(event.target.value)}
+                  placeholder="Posez votre question..."
+                />
+                <button type="submit" className="btn btn-primary messages-attach-btn" disabled={assistantLoading || !assistantInput.trim()}>
+                  <Send size={15} />
+                </button>
+              </form>
+            </section>
+          </div>
+        ) : null}
       </div>
     </div>
   );
