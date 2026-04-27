@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { MessageSquare, Plus } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { MessageSquare } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { messageService } from '../services/messageService';
 import { useConversations } from '../hooks/useConversations';
@@ -29,9 +27,10 @@ export default function Messages() {
   const [showContact, setShowContact] = useState(false);
 
   const { conversations, search, setSearch, loading, error, reload, unreadCount, setConversations } = useConversations();
-  const { groupedMessages, loading: messagesLoading, loadingMore, sending, send, loadMore, setMessages } = useMessages(activeConversation?.id, user.id);
+  const { groupedMessages, loading: messagesLoading, sending, send, loadMore, setMessages } = useMessages(activeConversation?.id, user.id);
   const { socket, sendTyping } = useMessageSocket(localStorage.getItem('token'), activeConversation?.id);
   const typing = useTypingIndicator(socket, activeConversation?.id);
+  const isConversationOpen = Boolean(activeConversation?.id);
 
   useEffect(() => {
     const onResize = () => setMobile(window.innerWidth < 768);
@@ -42,6 +41,7 @@ export default function Messages() {
   useEffect(() => {
     if (!conversationId) {
       setActiveConversation(null);
+      setShowContact(false);
       return;
     }
 
@@ -65,6 +65,7 @@ export default function Messages() {
     setActiveConversation(conversation);
     setShowContact(!mobile);
     navigate(`/messages/${conversation.id}`, { replace: true });
+
     try {
       const rows = await messageService.fetchMessages(conversation.id, { limit: 30 });
       const ordered = [...rows].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
@@ -78,7 +79,7 @@ export default function Messages() {
 
   useEffect(() => {
     const current = conversations.find((conv) => conv.id === conversationId);
-    if (current) {
+    if (current && current.id !== activeConversation?.id) {
       void selectConversation(current);
     }
   }, [conversationId, conversations]);
@@ -103,6 +104,12 @@ export default function Messages() {
       verified,
     };
   }, [activeConversation, user.id]);
+
+  const otherParticipantId = activeConversation
+    ? activeConversation.user_1_id === user.id
+      ? activeConversation.user_2_id
+      : activeConversation.user_1_id
+    : '';
 
   const sharedFiles = useMemo(
     () => groupedMessages.filter((entry) => entry.type === 'message' && entry.value.file_url).map((entry) => ({
@@ -135,19 +142,20 @@ export default function Messages() {
 
   useEffect(() => {
     if (!socket || !activeConversation?.id) return undefined;
+
     const handler = (payload) => {
       if (payload?.conversation_id === activeConversation.id) {
         void reload();
       }
     };
+
     socket.on('new_message', handler);
     return () => socket.off('new_message', handler);
   }, [socket, activeConversation?.id, reload]);
 
-  const pageTitle = unreadCount > 0 ? `(${unreadCount}) InvestLink - Messages` : 'InvestLink - Messages';
   useEffect(() => {
-    document.title = pageTitle;
-  }, [pageTitle]);
+    document.title = unreadCount > 0 ? `(${unreadCount}) InvestLink - Messages` : 'InvestLink - Messages';
+  }, [unreadCount]);
 
   if (!user) return null;
 
@@ -184,11 +192,14 @@ export default function Messages() {
         contact={contact}
         status={typing ? 'En ligne' : 'Hors ligne'}
         typing={typing}
-        onProfile={() => navigate(`/members/${contact ? activeConversation.user_1_id === user.id ? activeConversation.user_2_id : activeConversation.user_1_id : ''}`)}
+        mobile={mobile}
+        onBack={mobile ? () => navigate('/messages', { replace: true }) : undefined}
+        onToggleDetails={mobile ? () => setShowContact(true) : undefined}
+        onProfile={() => navigate(`/members/${otherParticipantId}`)}
       />
       {messagesLoading ? (
         <div style={{ padding: 20, display: 'grid', gap: 10 }}>
-          {[...Array(6)].map((_, index) => <div key={index} className="loading-pulse" style={{ height: 64, borderRadius: 16, background: '#f8fafc' }} />)}
+          {[...Array(6)].map((_, index) => <div key={index} className="loading-pulse" style={{ height: 64, borderRadius: 16, background: 'var(--bg-3)' }} />)}
         </div>
       ) : (
         <MessageContainer
@@ -209,7 +220,7 @@ export default function Messages() {
         }}
         onSend={onSend}
         onAttach={() => document.getElementById('message-file-input')?.click()}
-        onToggleEmoji={() => toast('Émojis bientôt disponibles')}
+        onToggleEmoji={() => toast('Emojis bientôt disponibles')}
         attachment={attachment}
         onRemoveAttachment={() => setAttachment(null)}
         disabled={sending || (!input.trim() && !attachment)}
@@ -236,7 +247,9 @@ export default function Messages() {
   const detailPane = activeConversation && showContact ? (
     <ContactDetail
       contact={contact}
-      onOpenProfile={() => navigate(`/members/${contact ? activeConversation.user_1_id === user.id ? activeConversation.user_2_id : activeConversation.user_1_id : ''}`)}
+      mobile={mobile}
+      onClose={mobile ? () => setShowContact(false) : undefined}
+      onOpenProfile={() => navigate(`/members/${otherParticipantId}`)}
       onBlock={() => toast('Blocage à connecter au backend')}
       onReport={() => messageService.reportConversation(activeConversation.id, prompt('Motif du signalement :') || '')}
       sharedFiles={sharedFiles}
@@ -249,9 +262,22 @@ export default function Messages() {
       <div className="container" style={{ padding: 0, maxWidth: 1600 }}>
         <ChatLayout
           mobileMode={mobile}
-          sidebar={sidebar}
-          messages={messagesPane}
-          detail={detailPane || <div style={{ background: '#f8fafc', borderLeft: '1px solid #e5e7eb' }} />}
+          sidebar={mobile ? (isConversationOpen ? null : sidebar) : sidebar}
+          messages={mobile ? (isConversationOpen ? messagesPane : null) : messagesPane}
+          detail={
+            mobile ? (
+              detailPane ? (
+                <div className="messages-mobile-detail-shell">
+                  <button type="button" className="messages-mobile-detail-backdrop" onClick={() => setShowContact(false)} aria-label="Fermer les détails du contact" />
+                  <div className="messages-mobile-detail-panel">
+                    {detailPane}
+                  </div>
+                </div>
+              ) : null
+            ) : (
+              detailPane || <div style={{ background: 'var(--bg-3)', borderLeft: '1px solid var(--border)' }} />
+            )
+          }
         />
       </div>
     </div>

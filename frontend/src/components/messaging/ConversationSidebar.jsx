@@ -12,12 +12,12 @@ export default function ConversationSidebar({
   unreadCount,
 }) {
   return (
-    <aside style={{ background: '#f8fafc', borderRight: '1px solid #e5e7eb', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-      <div style={{ padding: 16, borderBottom: '1px solid #e5e7eb', display: 'grid', gap: 12 }}>
+    <aside style={{ background: 'var(--bg-3)', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+      <div style={{ padding: 16, borderBottom: '1px solid var(--border)', display: 'grid', gap: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <div>
-            <h2 style={{ fontSize: 18, fontWeight: 800, color: '#171717' }}>Conversations</h2>
-            <p style={{ fontSize: 12, color: '#737373' }}>{unreadCount} messages non lus</p>
+            <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text)' }}>Conversations</h2>
+            <p style={{ fontSize: 12, color: 'var(--text-3)' }}>{unreadCount} messages non lus</p>
           </div>
           <button type="button" className="btn btn-primary btn-sm" onClick={onCreateConversation}>
             <Plus size={15} /> Nouvelle
@@ -25,7 +25,7 @@ export default function ConversationSidebar({
         </div>
 
         <div style={{ position: 'relative' }}>
-          <Search size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+          <Search size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} />
           <input
             className="input"
             value={search}
@@ -40,11 +40,11 @@ export default function ConversationSidebar({
         {loading ? (
           <div style={{ padding: 16, display: 'grid', gap: 12 }}>
             {[...Array(6)].map((_, index) => (
-              <div key={index} className="loading-pulse" style={{ height: 74, borderRadius: 12, background: '#fff', border: '1px solid #e5e7eb' }} />
+              <div key={index} className="loading-pulse" style={{ height: 74, borderRadius: 12, background: '#fff', border: '1px solid var(--border)' }} />
             ))}
           </div>
         ) : conversations.length === 0 ? (
-          <div style={{ padding: 24, color: '#737373', fontStyle: 'italic' }}>Aucun message</div>
+          <div style={{ padding: 24, color: 'var(--text-3)', fontStyle: 'italic' }}>Aucun message</div>
         ) : (
           conversations.map((conversation) => (
             <ConversationItem

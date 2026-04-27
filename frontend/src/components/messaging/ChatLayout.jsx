@@ -2,8 +2,7 @@ export default function ChatLayout({ sidebar, messages, detail, mobileMode = fal
   if (mobileMode) {
     return (
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', minHeight: 'calc(100dvh - 70px)' }}>
-        {sidebar}
-        {messages}
+        {sidebar || messages}
         {detail}
       </div>
     );

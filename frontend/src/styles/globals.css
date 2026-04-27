@@ -333,12 +333,22 @@ select.input { appearance: none; background-image: url("data:image/svg+xml,%3csv
   background: var(--bg-2);
 }
 
+.messages-composer-form {
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+
 .messages-chat-footer__main {
   display: flex;
   align-items: flex-end;
   gap: 12px;
   width: 100%;
   min-width: 0;
+}
+
+.messages-input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
 }
 
 .messages-contact-btn {
@@ -416,6 +426,12 @@ select.input { appearance: none; background-image: url("data:image/svg+xml,%3csv
   flex-direction: column;
   overflow: hidden;
   pointer-events: auto;
+}
+
+.messages-mobile-detail-shell,
+.messages-mobile-detail-backdrop,
+.messages-mobile-detail-panel {
+  display: none;
 }
 
 .project-card {
@@ -783,9 +799,42 @@ select.input { appearance: none; background-image: url("data:image/svg+xml,%3csv
   .messages-chat-footer {
     position: sticky;
     bottom: 0;
+    padding-bottom: calc(14px + env(safe-area-inset-bottom));
   }
   .messages-chat-footer__main {
     gap: 10px;
+  }
+  .messages-input-row {
+    gap: 8px;
+  }
+  .messages-composer {
+    min-height: 44px;
+    font-size: 16px;
+  }
+  .messages-mobile-detail-shell {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 1400;
+  }
+  .messages-mobile-detail-backdrop {
+    display: block;
+    position: absolute;
+    inset: 0;
+    border: none;
+    background: rgba(24, 49, 83, 0.18);
+  }
+  .messages-mobile-detail-panel {
+    display: flex;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-height: min(78dvh, 700px);
+    background: #fff;
+    border-radius: 22px 22px 0 0;
+    box-shadow: 0 -16px 40px rgba(24, 49, 83, 0.18);
+    overflow: hidden;
   }
   .messages-ai-shell {
     right: 12px;

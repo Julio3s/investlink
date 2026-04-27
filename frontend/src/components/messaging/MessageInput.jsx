@@ -23,20 +23,20 @@ export default function MessageInput({
   }, [value]);
 
   return (
-    <form onSubmit={onSend} style={{ borderTop: '1px solid #e5e7eb', background: '#fff', padding: 16, display: 'grid', gap: 12 }}>
+    <form onSubmit={onSend} className="messages-composer-form" style={{ borderTop: '1px solid var(--border)', background: '#fff', padding: 16, display: 'grid', gap: 12 }}>
       {attachment && (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '10px 12px', borderRadius: 12, background: '#f8fafc', border: '1px solid #e5e7eb' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '10px 12px', borderRadius: 12, background: 'var(--bg-3)', border: '1px solid var(--border)' }}>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontWeight: 600, fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{attachment.name}</div>
-            <div style={{ fontSize: 12, color: '#737373' }}>{(attachment.size / 1024 / 1024).toFixed(1)} MB</div>
+            <div style={{ fontSize: 12, color: 'var(--text-3)' }}>{(attachment.size / 1024 / 1024).toFixed(1)} MB</div>
           </div>
           <button type="button" className="btn btn-ghost btn-sm" onClick={onRemoveAttachment}>Retirer</button>
         </div>
       )}
 
-      {typing && <div style={{ color: '#2563eb', fontSize: 13 }}>L’autre participant est en train d’écrire.</div>}
+      {typing && <div style={{ color: 'var(--primary)', fontSize: 13 }}>L’autre participant est en train d’écrire.</div>}
 
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10 }}>
+      <div className="messages-input-row">
         <button type="button" className="btn btn-outline messages-attach-btn" onClick={onAttach} aria-label="Joindre un fichier">
           <Paperclip size={16} />
         </button>
@@ -45,7 +45,7 @@ export default function MessageInput({
         </button>
         <textarea
           ref={textRef}
-          className="input"
+          className="input messages-composer"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Écrivez votre message..."
@@ -63,7 +63,7 @@ export default function MessageInput({
         </button>
       </div>
 
-      {charCount > 500 && <div style={{ fontSize: 12, color: '#737373', textAlign: 'right' }}>{charCount} caractères</div>}
+      {charCount > 500 && <div style={{ fontSize: 12, color: 'var(--text-3)', textAlign: 'right' }}>{charCount} caractères</div>}
     </form>
   );
 }
