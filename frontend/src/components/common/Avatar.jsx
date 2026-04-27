@@ -19,7 +19,7 @@ export default function Avatar({
         width: size,
         height: size,
         borderRadius: '50%',
-        background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+        background: 'linear-gradient(135deg, #d4a853, #8b6914)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

@@ -68,7 +68,7 @@ export default function Notifications() {
             {notifs.map(n => {
               const Icon = ICON_MAP[n.type] || Bell;
               const iconColors = {
-                new_message: '#3b82f6', new_conversation: '#3b82f6',
+                new_message: '#d4a853', new_conversation: '#d4a853',
                 kyc_result: n.title.includes('✅') ? '#10b981' : '#ef4444',
                 project_validated: '#10b981', account_action: '#f59e0b',
               };
@@ -81,15 +81,15 @@ export default function Notifications() {
                   className="responsive-row"
                   style={{
                     padding: '16px 20px',
-                    background: n.is_read ? 'var(--bg-2)' : 'rgba(59,130,246,0.06)',
-                    border: `1px solid ${n.is_read ? 'var(--border)' : 'rgba(59,130,246,0.2)'}`,
+                    background: n.is_read ? 'var(--bg-2)' : 'rgba(212,168,83,0.06)',
+                    border: `1px solid ${n.is_read ? 'var(--border)' : 'rgba(212,168,83,0.2)'}`,
                     borderRadius: 'var(--radius)',
                     gap: 14,
                     cursor: n.reference_type ? 'pointer' : 'default',
                     transition: 'all 0.15s',
                   }}
                   onMouseEnter={e => { if (n.reference_type) e.currentTarget.style.borderColor = 'var(--primary)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = n.is_read ? 'var(--border)' : 'rgba(59,130,246,0.2)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = n.is_read ? 'var(--border)' : 'rgba(212,168,83,0.2)'; }}
                 >
                   <div style={{ width: 36, height: 36, borderRadius: '50%', background: `${color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', color, flexShrink: 0 }}>
                     <Icon size={16} />

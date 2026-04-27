@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const pool = require('../config/db');
+const { trackAuthenticatedSession } = require('./analytics');
 
 const authenticate = async (req, res, next) => {
   try {
@@ -26,6 +27,7 @@ const authenticate = async (req, res, next) => {
     }
 
     req.user = user;
+    void trackAuthenticatedSession(req).catch(() => {});
     next();
   } catch (err) {
     return res.status(401).json({ message: 'Token invalide' });

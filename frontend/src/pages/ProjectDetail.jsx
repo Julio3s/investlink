@@ -113,7 +113,7 @@ export default function ProjectDetail() {
                         <div
                           style={{
                             height: 180,
-                            background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.1))',
+                            background: 'linear-gradient(135deg, rgba(212,168,83,0.15), rgba(139,105,20,0.1))',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -185,7 +185,7 @@ export default function ProjectDetail() {
                     <div
                       style={{
                         height: 180,
-                        background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.1))',
+                        background: 'linear-gradient(135deg, rgba(212,168,83,0.15), rgba(139,105,20,0.1))',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -277,7 +277,7 @@ export default function ProjectDetail() {
           </div>
 
           <div className="project-sidebar" style={{ display: 'flex', flexDirection: 'column', gap: 20, position: 'sticky', top: 90 }}>
-            <div className="card" style={{ textAlign: 'center', background: 'linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.05))', borderColor: 'rgba(59,130,246,0.2)' }}>
+            <div className="card" style={{ textAlign: 'center', background: 'linear-gradient(135deg, rgba(212,168,83,0.08), rgba(139,105,20,0.05))', borderColor: 'rgba(212,168,83,0.2)' }}>
               <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-3)', marginBottom: 8 }}>Montant recherche</div>
               <div style={{ fontSize: 36, fontWeight: 800, letterSpacing: '-0.04em' }}>
                 {Number(project.amount_sought).toLocaleString('fr-FR')} EUR

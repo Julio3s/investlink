@@ -5,9 +5,11 @@ const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
 const initDb = require('./config/initDb');
+const { trackVisitor } = require('./middleware/analytics');
 
 const app = express();
 const server = http.createServer(app);
+app.set('trust proxy', 1);
 
 // Flexible CORS pour supports localhost, ngrok, et autres
 const corsOptions = {
@@ -38,6 +40,7 @@ const io = new Server(server, {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/api', trackVisitor);
 
 // Static files
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));

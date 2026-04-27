@@ -525,7 +525,7 @@ export default function Messages() {
       <div className="messages-ai-shell" style={{ bottom: aiShellBottom, right: isMobile ? 12 : 24, left: isMobile ? 12 : 'auto' }}>
         {showAI ? (
           <div className="messages-ai-panel">
-            <div className="messages-ai-header" style={{ background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="messages-ai-header" style={{ background: 'linear-gradient(135deg, #d4a853, #8b6914)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'white' }}>
                 <Bot size={18} />
                 <span style={{ fontWeight: 700 }}>InvestBot</span>
@@ -600,7 +600,7 @@ export default function Messages() {
               borderRadius: '50%',
               padding: 0,
               justifyContent: 'center',
-              boxShadow: '0 8px 24px rgba(59,130,246,0.4)',
+              boxShadow: '0 8px 24px rgba(212,168,83,0.35)',
               pointerEvents: 'auto',
             }}
           >

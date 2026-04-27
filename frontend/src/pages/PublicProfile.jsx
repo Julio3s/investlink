@@ -198,7 +198,7 @@ export default function PublicProfile() {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            background: 'linear-gradient(135deg, rgba(59,130,246,0.16), rgba(16,185,129,0.12))',
+                            background: 'linear-gradient(135deg, rgba(212,168,83,0.16), rgba(46,204,113,0.12))',
                             fontWeight: 700,
                           }}
                         >

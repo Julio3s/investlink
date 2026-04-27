@@ -14,14 +14,14 @@ function ProjectCard({ project, onFavorite }) {
   const trustColor = project.trust_score > 66 ? 'var(--success)' : project.trust_score > 33 ? 'var(--gold)' : 'var(--danger)';
   const trustLabel = project.trust_score > 66 ? 'Eleve' : project.trust_score > 33 ? 'Moyen' : 'Faible';
 
-  const statusColors = { brouillon: '#5a6278', publie: '#3b82f6', 'publié': '#3b82f6', en_recherche: '#f59e0b', finance: '#10b981', 'financé': '#10b981' };
+  const statusColors = { brouillon: '#5f5f68', publie: '#d4a853', 'publié': '#d4a853', en_recherche: '#c49b3f', finance: '#2ecc71', 'financé': '#2ecc71' };
   const statusLabels = { brouillon: 'Brouillon', publie: 'Publie', 'publié': 'Publie', en_recherche: 'En recherche', finance: 'Finance', 'financé': 'Finance' };
-  const statusColor = statusColors[project.status] || '#3b82f6';
+  const statusColor = statusColors[project.status] || '#d4a853';
   const statusLabel = statusLabels[project.status] || project.status;
 
   return (
     <Link to={`/projects/${project.id}`} className="card glow-card project-card">
-      <div style={{ height: 160, backgroundColor: 'rgba(59,130,246,0.08)', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ height: 160, backgroundColor: 'rgba(212,168,83,0.08)', position: 'relative', overflow: 'hidden' }}>
         <CoverImage
           src={project.image_url}
           alt={project.title}
@@ -32,7 +32,7 @@ function ProjectCard({ project, onFavorite }) {
               style={{
                 width: '100%',
                 height: '100%',
-                background: 'linear-gradient(135deg, rgba(59,130,246,0.18), rgba(139,92,246,0.1))',
+                background: 'linear-gradient(135deg, rgba(212,168,83,0.18), rgba(139,105,20,0.1))',
               }}
             />
           }

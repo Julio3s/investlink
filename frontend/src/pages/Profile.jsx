@@ -88,7 +88,7 @@ export default function Profile() {
           <div className="animate-in">
             {/* Trust score card */}
             <div className="card responsive-row" style={{ marginBottom: 24, alignItems: 'center' }}>
-              <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg,#3b82f6,#8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 800, color: 'white', flexShrink: 0, overflow: 'hidden' }}>
+              <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg,#d4a853,#8b6914)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 800, color: 'white', flexShrink: 0, overflow: 'hidden' }}>
                 {user?.avatar_url ? <img src={getFileUrl(user.avatar_url)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : user?.first_name?.[0]}
               </div>
               <div style={{ flex: 1 }}>
@@ -182,7 +182,7 @@ export default function Profile() {
                       </div>
                     </div>
                   </div>
-                  <div style={{ fontSize: 13, color: 'var(--text-3)', padding: '12px 16px', background: 'rgba(59,130,246,0.05)', borderRadius: 'var(--radius)', border: '1px solid rgba(59,130,246,0.1)' }}>
+                  <div style={{ fontSize: 13, color: 'var(--text-3)', padding: '12px 16px', background: 'rgba(212,168,83,0.06)', borderRadius: 'var(--radius)', border: '1px solid rgba(212,168,83,0.12)' }}>
                     🔒 Vos documents sont traités de manière confidentielle et uniquement par nos équipes de validation.
                   </div>
                   <button type="submit" className="btn btn-primary" disabled={kycSending} style={{ alignSelf: 'flex-start' }}>

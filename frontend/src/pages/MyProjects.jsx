@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import api from '../utils/api';
 import CoverImage from '../components/common/CoverImage';
 
-const STATUS_COLOR = { brouillon: '#5a6278', publie: '#3b82f6', 'publié': '#3b82f6', en_recherche: '#f59e0b', finance: '#10b981', 'financé': '#10b981' };
+const STATUS_COLOR = { brouillon: '#5f5f68', publie: '#d4a853', 'publié': '#d4a853', en_recherche: '#c49b3f', finance: '#2ecc71', 'financé': '#2ecc71' };
 const STATUS_LABEL = { brouillon: 'Brouillon', publie: 'Publie', 'publié': 'Publie', en_recherche: 'En recherche', finance: 'Finance', 'financé': 'Finance' };
 
 export default function MyProjects() {
@@ -62,12 +62,12 @@ export default function MyProjects() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {projects.map((project) => {
-              const statusColor = STATUS_COLOR[project.status] || '#3b82f6';
+              const statusColor = STATUS_COLOR[project.status] || '#d4a853';
               const statusLabel = STATUS_LABEL[project.status] || project.status;
 
               return (
                 <div key={project.id} className="card responsive-row" style={{ alignItems: 'center' }}>
-                  <div style={{ width: 56, height: 56, borderRadius: 14, overflow: 'hidden', flexShrink: 0, background: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.15))' }}>
+                  <div style={{ width: 56, height: 56, borderRadius: 14, overflow: 'hidden', flexShrink: 0, background: 'linear-gradient(135deg, rgba(212,168,83,0.2), rgba(139,105,20,0.15))' }}>
                     <CoverImage
                       src={project.image_url}
                       alt={project.title}

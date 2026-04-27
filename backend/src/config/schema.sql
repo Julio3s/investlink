@@ -131,6 +131,22 @@ CREATE TABLE IF NOT EXISTS reports (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
+-- Analytics sessions
+CREATE TABLE IF NOT EXISTS analytics_sessions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  session_key VARCHAR(255) UNIQUE NOT NULL,
+  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  ip_address VARCHAR(100),
+  user_agent TEXT,
+  device_name VARCHAR(255),
+  first_seen_at TIMESTAMP DEFAULT NOW(),
+  last_seen_at TIMESTAMP DEFAULT NOW(),
+  request_count INTEGER DEFAULT 1,
+  last_path VARCHAR(500),
+  last_method VARCHAR(20),
+  is_authenticated BOOLEAN DEFAULT FALSE
+);
+
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_projects_owner ON projects(owner_id);
 CREATE INDEX IF NOT EXISTS idx_projects_status ON projects(status);
@@ -138,6 +154,9 @@ CREATE INDEX IF NOT EXISTS idx_projects_sector ON projects(sector);
 CREATE INDEX IF NOT EXISTS idx_messages_conversation ON messages(conversation_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);
 CREATE INDEX IF NOT EXISTS idx_conversations_users ON conversations(user_1_id, user_2_id);
+CREATE INDEX IF NOT EXISTS idx_analytics_sessions_user ON analytics_sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_analytics_sessions_last_seen ON analytics_sessions(last_seen_at DESC);
+CREATE INDEX IF NOT EXISTS idx_analytics_sessions_ip ON analytics_sessions(ip_address);
 
 -- Trigger: update updated_at
 CREATE OR REPLACE FUNCTION update_updated_at()
