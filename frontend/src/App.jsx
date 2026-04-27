@@ -11,6 +11,7 @@ import ProjectDetail from './pages/ProjectDetail';
 import CreateProject from './pages/CreateProject';
 import MyProjects from './pages/MyProjects';
 import Messages from './pages/Messages';
+import Community from './pages/Community';
 import Profile from './pages/Profile';
 import Admin from './pages/Admin';
 import Notifications from './pages/Notifications';
@@ -56,6 +57,11 @@ function AppRoutes() {
         <Route path="/messages" element={
           <PrivateRoute>
             <Messages />
+          </PrivateRoute>
+        } />
+        <Route path="/community" element={
+          <PrivateRoute>
+            <Community />
           </PrivateRoute>
         } />
         <Route path="/messages/:conversationId" element={

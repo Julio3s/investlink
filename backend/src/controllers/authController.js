@@ -14,12 +14,12 @@ const register = async (req, res) => {
     const { email, password, role, first_name, last_name, phone, country } = req.body;
 
     if (!['porteur', 'investisseur'].includes(role)) {
-      return res.status(400).json({ message: 'Rôle invalide' });
+      return res.status(400).json({ message: 'Role invalide' });
     }
 
     const existing = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
     if (existing.rows[0]) {
-      return res.status(409).json({ message: 'Email déjà utilisé' });
+      return res.status(409).json({ message: 'Email deja utilise' });
     }
 
     const password_hash = await bcrypt.hash(password, 10);
@@ -35,7 +35,7 @@ const register = async (req, res) => {
     const token = generateToken(user);
 
     res.status(201).json({
-      message: 'Compte créé avec succès',
+      message: 'Compte cree avec succes',
       token,
       user: { id: user.id, email: user.email, role: user.role, first_name: user.first_name, last_name: user.last_name },
     });
@@ -51,7 +51,7 @@ const login = async (req, res) => {
     const { email, password } = req.body;
 
     const result = await pool.query(
-      `SELECT id, email, password_hash, role, first_name, last_name, is_active, is_suspended, 
+      `SELECT id, email, password_hash, role, first_name, last_name, is_active, is_suspended,
        verification_status, trust_score, avatar_url FROM users WHERE email = $1`,
       [email]
     );
@@ -98,6 +98,47 @@ const getMe = async (req, res) => {
   }
 };
 
+// GET /auth/members
+const getMembers = async (req, res) => {
+  try {
+    const { q = '', role = '' } = req.query;
+    const filters = ['id != $1', 'is_active = TRUE', 'is_suspended = FALSE'];
+    const values = [req.user.id];
+    let i = 2;
+
+    if (q) {
+      filters.push(`(
+        first_name ILIKE $${i}
+        OR last_name ILIKE $${i}
+        OR email ILIKE $${i}
+        OR country ILIKE $${i}
+      )`);
+      values.push(`%${q}%`);
+      i += 1;
+    }
+
+    if (role && ['porteur', 'investisseur', 'admin'].includes(role)) {
+      filters.push(`role = $${i}`);
+      values.push(role);
+      i += 1;
+    }
+
+    const result = await pool.query(
+      `SELECT id, email, role, first_name, last_name, country, bio, avatar_url,
+              verification_status, trust_score, created_at
+       FROM users
+       WHERE ${filters.join(' AND ')}
+       ORDER BY verification_status = 'verifie' DESC, trust_score DESC, created_at DESC`,
+      values
+    );
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
+
 // PUT /auth/profile
 const updateProfile = async (req, res) => {
   try {
@@ -115,7 +156,7 @@ const updateProfile = async (req, res) => {
     if (bio !== undefined) { fields.push(`bio=$${i++}`); values.push(bio); }
     if (avatar_url) { fields.push(`avatar_url=$${i++}`); values.push(avatar_url); }
 
-    if (!fields.length) return res.status(400).json({ message: 'Aucun champ à mettre à jour' });
+    if (!fields.length) return res.status(400).json({ message: 'Aucun champ a mettre a jour' });
 
     values.push(req.user.id);
     const result = await pool.query(
@@ -130,4 +171,4 @@ const updateProfile = async (req, res) => {
   }
 };
 
-module.exports = { register, login, getMe, updateProfile };
+module.exports = { register, login, getMe, getMembers, updateProfile };

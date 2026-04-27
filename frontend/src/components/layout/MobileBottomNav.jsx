@@ -5,6 +5,7 @@ import {
   Search,
   MessageSquare,
   Bell,
+  Users,
   User,
   Briefcase,
   LayoutDashboard,
@@ -23,6 +24,7 @@ const getItems = (user) => {
   const items = [
     { to: '/', label: 'Accueil', icon: Home },
     { to: '/projects', label: 'Explorer', icon: Search },
+    { to: '/community', label: 'Communaute', icon: Users },
     { to: '/messages', label: 'Messages', icon: MessageSquare },
     { to: '/notifications', label: 'Alerts', icon: Bell },
     { to: '/profile', label: 'Profil', icon: User },
